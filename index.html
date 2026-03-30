@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Impact of AI-Generated Text on the Internet</title>
+    <meta name="description" content="By mid-2025, roughly 35% of newly published websites were classified as AI-generated or AI-assisted. We analyze the impact on semantic diversity, factual accuracy, sentiment, and more.">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <meta name="robots" content="all">
+    <meta content="en_US" property="og:locale">
+    <meta content="website" property="og:type">
+    <meta content="https://ai-on-the-internet.github.io" property="og:url">
+    <meta content="The Impact of AI-Generated Text on the Internet" property="og:title">
+    <meta content="By mid-2025, roughly 35% of newly published websites were classified as AI-generated or AI-assisted." property="og:description">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:description" content="The Impact of AI-Generated Text on the Internet">
+
+    <link rel="stylesheet" type="text/css" media="all" href="assets/stylesheets/main_free.css" />
+    <link rel="stylesheet" type="text/css" media="all" href="clarity/clarity.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/foundation.min.css">
+    <script src="https://cdn.plot.ly/plotly-2.35.0.min.js" charset="utf-8"></script>
+</head>
+
+<body>
+
+    <!-- Title Page -->
+    <div class="container blog" id="first-content" style="background-color: #E0E4E6;">
+        <div class="blog-title no-cover">
+            <div class="blog-intro">
+                <div>
+                    <h1 class="title" style="font-weight: 800;"><b style="font-weight: 800;">The Impact of AI-Generated Text on the Internet</b></h1>
+                    <p class="author">
+                        <a href="#">Jonas Dolezal</a> <sup>1</sup>,
+                        <a href="#">Sawood Alam</a> <sup>2</sup>,
+                        <a href="#">Mark Graham</a> <sup>2</sup>,
+                        <a href="https://www.matyasbohacek.com">Matyas Bohacek</a> <sup>3</sup>*
+                    </p>
+                    <p class="author" style="padding-top: 0px;">
+                        <sup>1</sup> Imperial College London &nbsp;&nbsp;
+                        <sup>2</sup> Internet Archive &nbsp;&nbsp;
+                        <sup>3</sup> Stanford University
+                    </p>
+                    <p class="abstract">
+                        We construct a representative sample of websites published on the internet between 2022 and 2025 using the Internet Archive, and apply a state-of-the-art AI text detector. By mid-2025, roughly <b>35% of newly published websites</b> were classified as AI-generated or AI-assisted, up from zero before ChatGPT's launch in late 2022. We find statistically significant evidence that increases in AI-generated text correlate negatively with semantic diversity and positively with the prevalence of positive sentiment, but we do not find evidence for decreased factual accuracy or stylistic diversity. This diverges from public perception: in a survey of US adults, the majority believed in all of these negative impacts.
+                    </p>
+
+                    <div class="info">
+                        <div>
+                            <a href="https://github.com/maty-bohacek/internet-ai-impact" class="button icon" style="background-color: rgba(255, 255, 255, 0.2);"> Paper <i class="fa-solid fa-book-open"></i></a> &nbsp;&nbsp;
+                            <a href="https://github.com/maty-bohacek/internet-ai-impact" class="button icon" style="background-color: rgba(255, 255, 255, 0.2);">Code &amp; Data <i class="fa-solid fa-code"></i></a> &nbsp;&nbsp;
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Findings -->
+    <div class="container blog main first" id="blog-main">
+        <fieldset class="insights-box">
+            <legend>Key Findings</legend>
+            <ul style="margin-left: 1.5em; margin-bottom: 0;">
+                <li style="margin-bottom: 0.8em;"><b>~35% of new websites are AI-generated or AI-assisted by mid-2025,</b> up from effectively zero before ChatGPT's launch in November 2022.</li>
+                <li style="margin-bottom: 0.8em;"><b>Two of six hypothesized negative impacts are confirmed:</b> semantic contraction (reduced diversity of ideas) and positivity shift (artificially cheerful tone).</li>
+                <li style="margin-bottom: 0.8em;"><b>Public perception diverges from evidence:</b> the majority of US adults believe in all six negative impacts, including those not supported by the data (truth decay, stylistic monoculture).</li>
+                <li style="margin-bottom: 0.0em;"><b>Beliefs correlate with AI usage and favorability:</b> infrequent AI users and AI skeptics are significantly more likely to believe in these negative impacts.</li>
+            </ul>
+        </fieldset>
+    </div>
+
+    <!-- Prevalence Section -->
+    <div class="container blog main">
+        <h1>AI-Generated Text on the Internet</h1>
+    </div>
+
+    <div class="container blog large gray">
+        <div class="plot-container" id="prevalence-plot" style="width:100%; height:420px;"></div>
+        <p class="caption">
+            <b>AI-Generated Text on the Internet from Mid-2022 to Mid-2025.</b> The proportion of websites classified as fully AI-generated (red) and AI-generated or AI-assisted (purple) based on Pangram v3 detection applied to representative samples obtained from the Internet Archive. The dashed line marks ChatGPT's public launch in November 2022.
+        </p>
+    </div>
+
+    <!-- Summary: Evidence vs. Belief -->
+    <div class="container blog main">
+        <h1>Evidence vs. Public Belief</h1>
+    </div>
+
+    <div class="container blog large gray">
+        <div class="plot-container" id="summary-plot" style="width:100%; height:340px;"></div>
+        <p class="caption">
+            <b>Statistical Evidence vs. Public Belief for Six Hypotheses.</b> Left: Pearson correlation coefficient (&#961;) between the hypothesis signal and AI prevalence. Green bars indicate statistically significant correlations (p &lt; 0.05). Right: percentage of US adult survey respondents who lean towards agreement with each hypothesis. The public believes in all six negative impacts, but only two are supported by the data.
+        </p>
+    </div>
+
+    <!-- Shared legend -->
+    <div class="container blog main" style="padding-top: 2vh;">
+        <h1>Hypothesis Results &amp; Participant Study</h1>
+        <p class="text" style="font-size: 90%; color: #666;">
+            For each hypothesis, we show (a) the correlation between the measured signal and AI prevalence across monthly samples, (b) the overall distribution of participant survey responses, (c) responses broken down by AI usage frequency, and (d) responses by general view of AI's impact on society.
+        </p>
+        <div id="survey-legend" style="margin: 1.5vh 0 0.5vh 0;"></div>
+    </div>
+
+    <!-- ============ HYPOTHESIS 1 ============ -->
+    <div class="container blog main">
+        <hr class="section-divider">
+        <div class="hypothesis-section">
+            <h2>Hypothesis 1: Semantic Contraction <span class="stat-badge confirmed">Confirmed &bull; &#961; = 0.47, p = 0.004</span></h2>
+            <p class="hypothesis-statement">"As AI text becomes more common on the internet, the range of unique ideas and diverse viewpoints shrinks."</p>
+        </div>
+    </div>
+
+    <div class="container blog large gray">
+        <div class="plot-container" id="scatter-h1" style="width:100%; height:340px;"></div>
+        <p class="caption">
+            <b>(a) Quantitative Analysis.</b> Average pairwise cosine similarity of semantic embeddings plotted against AI Likelihood score. A statistically significant positive correlation (&#961; = 0.47, p = 0.004) confirms that increased AI content correlates with reduced semantic diversity. Across all months, AI-generated websites had 33% higher semantic similarity than non-AI websites (0.0701 vs. 0.0526).
+        </p>
+    </div>
+
+    <div class="container blog large">
+        <div class="survey-grid">
+            <div>
+                <div class="plot-container" id="survey-overall-h1" style="width:100%; height:260px;"></div>
+                <p class="caption"><b>(b) Overall survey responses.</b> 60.9% lean towards agreement.</p>
+            </div>
+            <div>
+                <div class="plot-container" id="survey-usage-h1" style="width:100%; height:260px;"></div>
+                <p class="caption"><b>(c) By AI usage frequency.</b></p>
+            </div>
+            <div>
+                <div class="plot-container" id="survey-view-h1" style="width:100%; height:260px;"></div>
+                <p class="caption"><b>(d) By view of AI impact.</b></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ HYPOTHESIS 2 ============ -->
+    <div class="container blog main">
+        <hr class="section-divider">
+        <div class="hypothesis-section">
+            <h2>Hypothesis 2: Truth Decay <span class="stat-badge not-confirmed">Not Confirmed &bull; &#961; = &minus;0.19, p = 0.27</span></h2>
+            <p class="hypothesis-statement">"As AI content becomes more common on the internet, I am encountering factually incorrect information and hallucinations more frequently."</p>
+        </div>
+    </div>
+
+    <div class="container blog large gray">
+        <div class="plot-container" id="scatter-h2" style="width:100%; height:340px;"></div>
+        <p class="caption">
+            <b>(a) Quantitative Analysis.</b> Factual error rate plotted against AI Likelihood score. No statistically significant correlation (&#961; = &minus;0.19, p = 0.27) was found, despite 75.1% of survey respondents believing in this hypothesis.
+        </p>
+    </div>
+
+    <div class="container blog large">
+        <div class="survey-grid">
+            <div>
+                <div class="plot-container" id="survey-overall-h2" style="width:100%; height:260px;"></div>
+                <p class="caption"><b>(b) Overall survey responses.</b> 75.1% lean towards agreement.</p>
+            </div>
+            <div>
+                <div class="plot-container" id="survey-usage-h2" style="width:100%; height:260px;"></div>
+                <p class="caption"><b>(c) By AI usage frequency.</b></p>
+            </div>
+            <div>
+                <div class="plot-container" id="survey-view-h2" style="width:100%; height:260px;"></div>
+                <p class="caption"><b>(d) By view of AI impact.</b></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ HYPOTHESIS 3 ============ -->
+    <div class="container blog main">
+        <hr class="section-divider">
+        <div class="hypothesis-section">
+            <h2>Hypothesis 3: Positivity Shift <span class="stat-badge confirmed">Confirmed &bull; &#961; = 0.56, p = 0.0003</span></h2>
+            <p class="hypothesis-statement">"As AI content becomes more common on the internet, online writing feels increasingly sanitized and artificially cheerful."</p>
+        </div>
+    </div>
+
+    <div class="container blog large gray">
+        <div class="plot-container" id="scatter-h3" style="width:100%; height:340px;"></div>
+        <p class="caption">
+            <b>(a) Quantitative Analysis.</b> Rate of positive documents (classified by sentiment analysis) plotted against AI Likelihood score. A statistically significant positive correlation (&#961; = 0.56, p = 0.0003) confirms the hypothesis. AI-generated websites had 107% higher positive sentiment scores than non-AI websites (0.7042 vs. 0.3400).
+        </p>
+    </div>
+
+    <div class="container blog large">
+        <div class="survey-grid">
+            <div>
+                <div class="plot-container" id="survey-overall-h3" style="width:100%; height:260px;"></div>
+                <p class="caption"><b>(b) Overall survey responses.</b> 72.0% lean towards agreement.</p>
+            </div>
+            <div>
+                <div class="plot-container" id="survey-usage-h3" style="width:100%; height:260px;"></div>
+                <p class="caption"><b>(c) By AI usage frequency.</b></p>
+            </div>
+            <div>
+                <div class="plot-container" id="survey-view-h3" style="width:100%; height:260px;"></div>
+                <p class="caption"><b>(d) By view of AI impact.</b></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ HYPOTHESIS 4 ============ -->
+    <div class="container blog main">
+        <hr class="section-divider">
+        <div class="hypothesis-section">
+            <h2>Hypothesis 4: Epistemic Islands <span class="stat-badge not-confirmed">Not Confirmed &bull; &#961; = &minus;0.12, p = 0.48</span></h2>
+            <p class="hypothesis-statement">"As AI content becomes more common on the internet, articles are increasingly providing answers without including links to external sources."</p>
+        </div>
+    </div>
+
+    <div class="container blog large gray">
+        <div class="plot-container" id="scatter-h4" style="width:100%; height:340px;"></div>
+        <p class="caption">
+            <b>(a) Quantitative Analysis.</b> Outbound link density (links per 1,000 words) plotted against AI Likelihood score. No statistically significant inverse correlation (&#961; = &minus;0.12, p = 0.48) was found.
+        </p>
+    </div>
+
+    <div class="container blog large">
+        <div class="survey-grid">
+            <div>
+                <div class="plot-container" id="survey-overall-h4" style="width:100%; height:260px;"></div>
+                <p class="caption"><b>(b) Overall survey responses.</b> 69.9% lean towards agreement.</p>
+            </div>
+            <div>
+                <div class="plot-container" id="survey-usage-h4" style="width:100%; height:260px;"></div>
+                <p class="caption"><b>(c) By AI usage frequency.</b></p>
+            </div>
+            <div>
+                <div class="plot-container" id="survey-view-h4" style="width:100%; height:260px;"></div>
+                <p class="caption"><b>(d) By view of AI impact.</b></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ HYPOTHESIS 5 ============ -->
+    <div class="container blog main">
+        <hr class="section-divider">
+        <div class="hypothesis-section">
+            <h2>Hypothesis 5: Entropy Dilution <span class="stat-badge not-confirmed">Not Confirmed &bull; &#961; = &minus;0.02, p = 0.89</span></h2>
+            <p class="hypothesis-statement">"As AI content becomes more common on the internet, content is becoming significantly longer in word count while having lower semantic density."</p>
+        </div>
+    </div>
+
+    <div class="container blog large gray">
+        <div class="plot-container" id="scatter-h5" style="width:100%; height:340px;"></div>
+        <p class="caption">
+            <b>(a) Quantitative Analysis.</b> Gzip compression ratio plotted against AI Likelihood score. No statistically significant correlation (&#961; = &minus;0.02, p = 0.89) was found.
+        </p>
+    </div>
+
+    <div class="container blog large">
+        <div class="survey-grid">
+            <div>
+                <div class="plot-container" id="survey-overall-h5" style="width:100%; height:260px;"></div>
+                <p class="caption"><b>(b) Overall survey responses.</b> 60.7% lean towards agreement.</p>
+            </div>
+            <div>
+                <div class="plot-container" id="survey-usage-h5" style="width:100%; height:260px;"></div>
+                <p class="caption"><b>(c) By AI usage frequency.</b></p>
+            </div>
+            <div>
+                <div class="plot-container" id="survey-view-h5" style="width:100%; height:260px;"></div>
+                <p class="caption"><b>(d) By view of AI impact.</b></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ HYPOTHESIS 6 ============ -->
+    <div class="container blog main">
+        <hr class="section-divider">
+        <div class="hypothesis-section">
+            <h2>Hypothesis 6: Stylistic Monoculture <span class="stat-badge not-confirmed">Not Confirmed &bull; &#961; = 0.24, p = 0.17</span></h2>
+            <p class="hypothesis-statement">"As AI content becomes more common on the internet, distinct individual writing styles are disappearing in favor of a generic, uniform voice."</p>
+        </div>
+    </div>
+
+    <div class="container blog large gray">
+        <div class="plot-container" id="scatter-h6" style="width:100%; height:340px;"></div>
+        <p class="caption">
+            <b>(a) Quantitative Analysis.</b> Average pairwise character 3-gram Jaccard similarity plotted against AI Likelihood score. Despite 83.0% of respondents believing in this hypothesis (the strongest public agreement), no statistically significant correlation (&#961; = 0.24, p = 0.17) was found.
+        </p>
+    </div>
+
+    <div class="container blog large">
+        <div class="survey-grid">
+            <div>
+                <div class="plot-container" id="survey-overall-h6" style="width:100%; height:260px;"></div>
+                <p class="caption"><b>(b) Overall survey responses.</b> 83.0% lean towards agreement.</p>
+            </div>
+            <div>
+                <div class="plot-container" id="survey-usage-h6" style="width:100%; height:260px;"></div>
+                <p class="caption"><b>(c) By AI usage frequency.</b></p>
+            </div>
+            <div>
+                <div class="plot-container" id="survey-view-h6" style="width:100%; height:260px;"></div>
+                <p class="caption"><b>(d) By view of AI impact.</b></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Citation -->
+    <div class="container blog main" style="padding-top: 3vh;">
+        <hr class="section-divider">
+        <h1>Citation</h1>
+<pre><code class="plaintext">@article{dolezal2025impact,
+  title={The Impact of AI-Generated Text on the Internet},
+  author={Dolezal, Jonas and Alam, Sawood and Graham, Mark and Bohacek, Matyas},
+  year={2025}
+}</code></pre>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p style="font-size: small;">
+                This website is built on the <a href="https://shikun.io/projects/clarity" style="font-size: small;">Clarity Template</a>.
+            </p>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <script src="assets/scripts/plots.js"></script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+@import url("https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap");
+
+.columns-12 {
+  display: grid;
+  column-gap: 2vw;
+  grid-template-columns: repeat(12, 1fr);
+}
+
+.columns-10 {
+  display: grid;
+  column-gap: 2vw;
+  grid-template-columns: repeat(10, 1fr);
+}
+
+.columns-8 {
+  display: grid;
+  column-gap: 2vw;
+  grid-template-columns: repeat(8, 1fr);
+}
+
+.columns-6 {
+  display: grid;
+  column-gap: 2vw;
+  grid-template-columns: repeat(6, 1fr);
+}
+
+.columns-5 {
+  display: grid;
+  column-gap: 2vw;
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.columns-4 {
+  display: grid;
+  column-gap: 2vw;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.columns-3 {
+  display: grid;
+  column-gap: 2vw;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.columns-2 {
+  display: grid;
+  column-gap: 2vw;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+@media screen and (max-width: 992px) {
+  .columns-12 {
+    grid-template-columns: repeat(6, 1fr);
+  }
+  .columns-10 {
+    grid-template-columns: repeat(5, 1fr);
+  }
+  .columns-8 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .columns-6 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .columns-5 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media screen and (max-width: 769px) {
+  .columns-12 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .columns-2 {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
