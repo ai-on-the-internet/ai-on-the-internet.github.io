@@ -18,6 +18,21 @@ async function loadCSV(url) {
     });
 }
 
+// String-preserving CSV loader (used for survey CSVs whose columns mix
+// strings and numbers). Numeric columns can be coerced by callers.
+async function loadCSVRaw(url) {
+    const resp = await fetch(url);
+    const text = await resp.text();
+    const lines = text.trim().replace(/\r/g, '').split('\n');
+    const headers = lines[0].split(',');
+    return lines.slice(1).map(line => {
+        const vals = line.split(',');
+        const obj = {};
+        headers.forEach((h, i) => { obj[h] = vals[i]; });
+        return obj;
+    });
+}
+
 // ============================================================
 // POLYNOMIAL FITTING (used only for prevalence plot)
 // ============================================================
@@ -122,25 +137,16 @@ function linearFit(xs, ys) {
 }
 
 // ============================================================
-// SURVEY DATA (from paper - real participant study numbers)
+// SURVEY DATA — quantitative metadata only.
+// `overall`, `byUsage`, `byView`, and `n` are populated at load time from
+// data/survey_hypotheses.csv (see populateSurveyData below).
+// rho/p/confirmed and the signal/yLabel fields describe the quantitative
+// internet-archive analysis, not the survey, and stay hardcoded.
 // ============================================================
 
 const SURVEY_DATA = {
     h1: {
         name: "Semantic Contraction",
-        n: 303,
-        overall: { SD: 8, D: 24, SoD: 51, SoA: 82, A: 75, SA: 28, N: 35 },
-        byUsage: {
-            "Never":  { SD: 1, D: 3, SoD: 5, N: 3, SoA: 10, A: 9, SA: 3 },
-            "Monthly": { SD: 1, D: 5, SoD: 9, N: 6, SoA: 16, A: 12, SA: 3 },
-            "Weekly":  { SD: 3, D: 8, SoD: 18, N: 12, SoA: 26, A: 24, SA: 10 },
-            "Daily":   { SD: 3, D: 8, SoD: 19, N: 14, SoA: 30, A: 30, SA: 12 }
-        },
-        byView: {
-            "Negative": { SD: 1, D: 4, SoD: 11, N: 8, SoA: 30, A: 38, SA: 20 },
-            "Neutral":  { SD: 1, D: 4, SoD: 8, N: 10, SoA: 10, A: 4, SA: 1 },
-            "Positive": { SD: 6, D: 16, SoD: 32, N: 17, SoA: 42, A: 33, SA: 7 }
-        },
         rho: 0.47, p: 0.004, confirmed: true,
         signalKey: 'h1_cosine_similarity',
         yLabel: "Avg. Pairwise Cosine Similarity",
@@ -148,38 +154,12 @@ const SURVEY_DATA = {
     },
     h2: {
         name: "Truth Decay",
-        n: 303,
-        overall: { SD: 6, D: 17, SoD: 20, SoA: 74, A: 80, SA: 48, N: 43 },
-        byUsage: {
-            "Never":  { SD: 0, D: 2, SoD: 2, N: 4, SoA: 8, A: 10, SA: 8 },
-            "Monthly": { SD: 1, D: 3, SoD: 4, N: 7, SoA: 15, A: 15, SA: 7 },
-            "Weekly":  { SD: 2, D: 5, SoD: 7, N: 14, SoA: 25, A: 26, SA: 16 },
-            "Daily":   { SD: 3, D: 7, SoD: 7, N: 18, SoA: 26, A: 29, SA: 17 }
-        },
-        byView: {
-            "Negative": { SD: 0, D: 3, SoD: 5, N: 10, SoA: 28, A: 38, SA: 28 },
-            "Neutral":  { SD: 1, D: 2, SoD: 4, N: 12, SoA: 10, A: 6, SA: 3 },
-            "Positive": { SD: 5, D: 12, SoD: 11, N: 21, SoA: 36, A: 36, SA: 17 }
-        },
         rho: -0.19, p: 0.27, confirmed: false,
         signalKey: 'h2_error_rate',
         yLabel: "Factual Error Rate"
     },
     h3: {
         name: "Positivity Shift",
-        n: 303,
-        overall: { SD: 5, D: 14, SoD: 20, SoA: 80, A: 78, SA: 60, N: 46 },
-        byUsage: {
-            "Never":  { SD: 0, D: 1, SoD: 2, N: 4, SoA: 9, A: 10, SA: 8 },
-            "Monthly": { SD: 1, D: 2, SoD: 4, N: 8, SoA: 16, A: 14, SA: 7 },
-            "Weekly":  { SD: 2, D: 5, SoD: 7, N: 15, SoA: 27, A: 25, SA: 20 },
-            "Daily":   { SD: 2, D: 6, SoD: 7, N: 19, SoA: 28, A: 29, SA: 25 }
-        },
-        byView: {
-            "Negative": { SD: 0, D: 2, SoD: 4, N: 10, SoA: 30, A: 35, SA: 31 },
-            "Neutral":  { SD: 1, D: 2, SoD: 3, N: 14, SoA: 10, A: 5, SA: 3 },
-            "Positive": { SD: 4, D: 10, SoD: 13, N: 22, SoA: 40, A: 38, SA: 26 }
-        },
         rho: 0.56, p: 0.0003, confirmed: true,
         signalKey: 'h3_positive_rate',
         yLabel: "Rate of Positive Documents",
@@ -187,62 +167,59 @@ const SURVEY_DATA = {
     },
     h4: {
         name: "Epistemic Islands",
-        n: 301,
-        overall: { SD: 8, D: 15, SoD: 12, SoA: 84, A: 77, SA: 40, N: 56 },
-        byUsage: {
-            "Never":  { SD: 1, D: 1, SoD: 1, N: 6, SoA: 10, A: 10, SA: 5 },
-            "Monthly": { SD: 1, D: 3, SoD: 2, N: 10, SoA: 17, A: 14, SA: 5 },
-            "Weekly":  { SD: 3, D: 5, SoD: 4, N: 18, SoA: 28, A: 25, SA: 15 },
-            "Daily":   { SD: 3, D: 6, SoD: 5, N: 22, SoA: 29, A: 28, SA: 15 }
-        },
-        byView: {
-            "Negative": { SD: 1, D: 2, SoD: 2, N: 12, SoA: 30, A: 35, SA: 22 },
-            "Neutral":  { SD: 1, D: 2, SoD: 2, N: 18, SoA: 10, A: 6, SA: 3 },
-            "Positive": { SD: 6, D: 11, SoD: 8, N: 26, SoA: 44, A: 36, SA: 15 }
-        },
         rho: -0.12, p: 0.48, confirmed: false,
         signalKey: 'h4_link_density',
         yLabel: "Outbound Link Density (per 1k words)"
     },
     h5: {
         name: "Entropy Dilution",
-        n: 299,
-        overall: { SD: 5, D: 19, SoD: 52, SoA: 82, A: 64, SA: 36, N: 41 },
-        byUsage: {
-            "Never":  { SD: 1, D: 2, SoD: 5, N: 4, SoA: 10, A: 8, SA: 4 },
-            "Monthly": { SD: 1, D: 3, SoD: 10, N: 7, SoA: 15, A: 12, SA: 4 },
-            "Weekly":  { SD: 1, D: 7, SoD: 17, N: 14, SoA: 27, A: 20, SA: 13 },
-            "Daily":   { SD: 2, D: 7, SoD: 20, N: 16, SoA: 30, A: 24, SA: 15 }
-        },
-        byView: {
-            "Negative": { SD: 0, D: 3, SoD: 10, N: 9, SoA: 30, A: 30, SA: 20 },
-            "Neutral":  { SD: 1, D: 3, SoD: 8, N: 12, SoA: 10, A: 4, SA: 2 },
-            "Positive": { SD: 4, D: 13, SoD: 34, N: 20, SoA: 42, A: 30, SA: 14 }
-        },
         rho: -0.02, p: 0.89, confirmed: false,
         signalKey: 'h5_compression_ratio',
         yLabel: "Gzip Compression Ratio"
     },
     h6: {
         name: "Stylistic Monoculture",
-        n: 301,
-        overall: { SD: 3, D: 6, SoD: 14, SoA: 78, A: 84, SA: 88, N: 28 },
-        byUsage: {
-            "Never":  { SD: 0, D: 0, SoD: 1, N: 2, SoA: 8, A: 10, SA: 13 },
-            "Monthly": { SD: 0, D: 1, SoD: 2, N: 5, SoA: 15, A: 16, SA: 13 },
-            "Weekly":  { SD: 1, D: 2, SoD: 5, N: 9, SoA: 26, A: 28, SA: 30 },
-            "Daily":   { SD: 2, D: 3, SoD: 6, N: 12, SoA: 29, A: 30, SA: 32 }
-        },
-        byView: {
-            "Negative": { SD: 0, D: 1, SoD: 2, N: 5, SoA: 28, A: 38, SA: 38 },
-            "Neutral":  { SD: 0, D: 1, SoD: 2, N: 10, SoA: 10, A: 8, SA: 7 },
-            "Positive": { SD: 3, D: 4, SoD: 10, N: 13, SoA: 40, A: 38, SA: 43 }
-        },
         rho: 0.24, p: 0.17, confirmed: false,
         signalKey: 'h6_jaccard_similarity',
         yLabel: "Avg. Pairwise Jaccard Similarity (3-gram)"
     }
 };
+
+// Populated from data/survey_overall.csv at load time.
+const OVERALL_SURVEY = { ai_usage: {}, ai_view: {} };
+
+// Likert columns in canonical order — must match the survey CSV headers.
+const LIKERT_KEYS = ['SD', 'D', 'SoD', 'N', 'SoA', 'A', 'SA'];
+
+function populateSurveyData(rows) {
+    rows.forEach(r => {
+        const hyp = SURVEY_DATA[r.hypothesis];
+        if (!hyp) return;
+        const counts = {};
+        LIKERT_KEYS.forEach(k => { counts[k] = Number(r[k]) || 0; });
+        if (r.split === 'overall') {
+            hyp.overall = counts;
+            hyp.n = Number(r.n) || 0;
+        } else if (r.split === 'by_usage') {
+            hyp.byUsage = hyp.byUsage || {};
+            hyp.byUsage[r.group] = counts;
+        } else if (r.split === 'by_view') {
+            hyp.byView = hyp.byView || {};
+            hyp.byView[r.group] = counts;
+        }
+    });
+}
+
+function populateOverallSurvey(rows) {
+    rows.forEach(r => {
+        if (r.dimension === 'ai_usage' || r.dimension === 'ai_view') {
+            OVERALL_SURVEY[r.dimension][r.bucket] = {
+                count: Number(r.count) || 0,
+                pct: Number(r.pct) || 0,
+            };
+        }
+    });
+}
 
 // ============================================================
 // PLOTLY CONFIG & STYLE
@@ -651,12 +628,11 @@ function plotSurveyLegends() {
 }
 
 function plotOverallSurveyDistributions() {
-    // Usage distribution (computed from H1 byUsage totals — same respondents across all hypotheses)
-    const h1 = SURVEY_DATA.h1;
+    // Usage distribution — read directly from data/survey_overall.csv
     const usageGroups = ["Never", "Monthly", "Weekly", "Daily"];
-    const usageCounts = usageGroups.map(g => Object.values(h1.byUsage[g]).reduce((a, b) => a + b, 0));
-    const usageTotal = usageCounts.reduce((a, b) => a + b, 0);
-    const usagePcts = usageCounts.map(c => Math.round(c / usageTotal * 1000) / 10);
+    const usagePcts = usageGroups.map(g =>
+        Math.round((OVERALL_SURVEY.ai_usage[g]?.pct ?? 0) * 10) / 10
+    );
 
     Plotly.newPlot('survey-usage-overall', [{
         x: usageGroups, y: usagePcts, type: 'bar',
@@ -671,11 +647,11 @@ function plotOverallSurveyDistributions() {
         plot_bgcolor: 'white', paper_bgcolor: 'white', bargap: 0.25
     }, PLOTLY_CONFIG);
 
-    // View distribution
+    // View distribution — read directly from data/survey_overall.csv
     const viewGroups = ["Negative", "Neutral", "Positive"];
-    const viewCounts = viewGroups.map(g => Object.values(h1.byView[g]).reduce((a, b) => a + b, 0));
-    const viewTotal = viewCounts.reduce((a, b) => a + b, 0);
-    const viewPcts = viewCounts.map(c => Math.round(c / viewTotal * 1000) / 10);
+    const viewPcts = viewGroups.map(g =>
+        Math.round((OVERALL_SURVEY.ai_view[g]?.pct ?? 0) * 10) / 10
+    );
 
     Plotly.newPlot('survey-view-overall', [{
         x: viewGroups, y: viewPcts, type: 'bar',
@@ -696,10 +672,15 @@ function plotOverallSurveyDistributions() {
 // ============================================================
 
 document.addEventListener('DOMContentLoaded', async function() {
-    const [prevalenceData, hypothesesData] = await Promise.all([
+    const [prevalenceData, hypothesesData, surveyOverallRows, surveyHypRows] = await Promise.all([
         loadCSV('data/prevalence.csv'),
-        loadCSV('data/hypotheses.csv')
+        loadCSV('data/hypotheses.csv'),
+        loadCSVRaw('data/survey_overall.csv'),
+        loadCSVRaw('data/survey_hypotheses.csv')
     ]);
+
+    populateOverallSurvey(surveyOverallRows);
+    populateSurveyData(surveyHypRows);
 
     // Attach month strings to hypothesis rows (CSV month column is parsed as a number by our loader)
     const hypothesesRaw = await fetch('data/hypotheses.csv').then(r => r.text());
