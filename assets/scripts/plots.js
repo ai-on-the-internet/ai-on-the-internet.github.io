@@ -143,7 +143,8 @@ const SURVEY_DATA = {
         },
         rho: 0.47, p: 0.004, confirmed: true,
         signalKey: 'h1_cosine_similarity',
-        yLabel: "Avg. Pairwise Cosine Similarity"
+        yLabel: "Avg. Pairwise Cosine Similarity",
+        yMin: 0
     },
     h2: {
         name: "Truth Decay",
@@ -181,7 +182,8 @@ const SURVEY_DATA = {
         },
         rho: 0.56, p: 0.0003, confirmed: true,
         signalKey: 'h3_positive_rate',
-        yLabel: "Rate of Positive Documents"
+        yLabel: "Rate of Positive Documents",
+        yMin: 0
     },
     h4: {
         name: "Epistemic Islands",
@@ -409,7 +411,8 @@ function plotHypothesisScatter(hypKey, hypRows) {
         },
         yaxis: {
             title: { text: hyp.yLabel, font: { size: 11 } },
-            gridcolor: '#f0f0f0', zeroline: false, tickfont: { size: 10 }
+            gridcolor: '#f0f0f0', zeroline: false, tickfont: { size: 10 },
+            ...(hyp.yMin !== undefined && { range: [hyp.yMin, Math.max(...ys) * 1.1] })
         },
         plot_bgcolor: 'white', paper_bgcolor: 'white',
         annotations: [{
@@ -484,7 +487,8 @@ function plotHypothesisTimeSeries(hypKey, hypRows) {
         yaxis: {
             title: { text: hyp.yLabel, font: { size: 11, color: signalColor } },
             gridcolor: '#f0f0f0', zeroline: false,
-            tickfont: { size: 10, color: signalColor }, side: 'left'
+            tickfont: { size: 10, color: signalColor }, side: 'left',
+            ...(hyp.yMin !== undefined && { range: [hyp.yMin, Math.max(...signal) * 1.1] })
         },
         yaxis2: {
             title: { text: 'AI Likelihood', font: { size: 11, color: aiColor } },
