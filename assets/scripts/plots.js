@@ -410,7 +410,8 @@ function plotHypothesisScatter(hypKey, hypRows) {
         margin: { t: 15, r: 15, b: 50, l: 60 },
         xaxis: {
             title: { text: 'AI Likelihood', font: { size: 11 } },
-            gridcolor: '#f0f0f0', zeroline: false, tickfont: { size: 10 }
+            gridcolor: '#f0f0f0', zeroline: false, tickfont: { size: 10 },
+            range: [0, 1]
         },
         yaxis: {
             title: { text: hyp.yLabel, font: { size: 11 } },
@@ -499,7 +500,8 @@ function plotHypothesisTimeSeries(hypKey, hypRows) {
         yaxis2: {
             title: { text: 'AI Likelihood', font: { size: 11, color: aiColor } },
             overlaying: 'y', side: 'right', gridcolor: 'transparent',
-            zeroline: false, tickfont: { size: 10, color: aiColor }
+            zeroline: false, tickfont: { size: 10, color: aiColor },
+            range: [0, 1]
         },
         plot_bgcolor: 'white', paper_bgcolor: 'white',
         legend: {
