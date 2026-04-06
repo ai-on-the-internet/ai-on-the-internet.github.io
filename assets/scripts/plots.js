@@ -342,7 +342,7 @@ function plotPrevalence(csvRows) {
             line: { color: '#999', width: 1.5, dash: 'dot' }
         }],
         annotations: [{
-            x: '2022-11-30', y: 21, text: 'ChatGPT Launch', showarrow: false,
+            x: '2022-11-30', y: 28, text: 'ChatGPT Launch', showarrow: false,
             font: { size: 12, color: '#666', family: MONO_FONT },
             xanchor: 'left', xshift: 8
         }],
