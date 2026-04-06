@@ -410,13 +410,11 @@ function plotHypothesisScatter(hypKey, hypRows) {
         margin: { t: 15, r: 15, b: 50, l: 60 },
         xaxis: {
             title: { text: 'AI Likelihood', font: { size: 11 } },
-            gridcolor: '#f0f0f0', zeroline: false, tickfont: { size: 10 },
-            range: [0, 1]
+            gridcolor: '#f0f0f0', zeroline: false, tickfont: { size: 10 }
         },
         yaxis: {
             title: { text: hyp.yLabel, font: { size: 11 } },
-            gridcolor: '#f0f0f0', zeroline: false, tickfont: { size: 10 },
-            ...(hyp.yMin !== undefined && { range: [hyp.yMin, Math.max(...ys) * 1.1] })
+            gridcolor: '#f0f0f0', zeroline: false, tickfont: { size: 10 }
         },
         plot_bgcolor: 'white', paper_bgcolor: 'white',
         annotations: [{
