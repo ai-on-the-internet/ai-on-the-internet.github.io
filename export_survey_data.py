@@ -1,247 +1,269 @@
 #!/usr/bin/env python3
 """
-Export per-participant survey data from the ai-prevalence repo for the website.
+Export survey data from the ai-prevalence repo for the website.
 
-Run this from the ai-prevalence repo (alongside export_website_data.py),
-pointed at the raw participant export (Qualtrics / Prolific CSV):
+Run from the ai-prevalence repo:
 
-    python export_survey_data.py --input data/survey/participants.csv \
-                                 --output output/survey.csv
+    python export_survey_data.py \
+        --data-dir human_study/data \
+        --output-dir output
 
-Produces a single CSV with one row per participant and these columns:
+Reads the three Prolific response files used by analyze_human_study.py:
 
-    participant_id, ai_usage, ai_view, h1, h2, h3, h4, h5, h6
+    human_study/data/prolific-part1-responses.csv   (H1, H2, H3)
+    human_study/data/prolific-part2-responses.csv   (H4, H6)
+    human_study/data/prolific-part3-responses.csv   (H5)
 
-Where:
-    ai_usage  ∈ {Never, Monthly, Weekly, Daily}
-    ai_view   ∈ {Negative, Neutral, Positive}
-    h1..h6    ∈ {SD, D, SoD, N, SoA, A, SA}   (7-point Likert short codes)
+…and writes pre-aggregated CSVs the website (assets/scripts/plots.js)
+can load directly:
 
-The hypothesis order matches assets/scripts/plots.js SURVEY_DATA:
-    h1 = Semantic Contraction
-    h2 = Truth Decay
-    h3 = Positivity Shift
-    h4 = Epistemic Islands
-    h5 = Entropy Dilution
-    h6 = Stylistic Monoculture
+    output/survey_overall.csv   — overall AI-usage and AI-view distributions
+                                  (drives the two figures in
+                                  "What is the public's perception of AI's
+                                  impact on the internet?")
 
-The website (plots.js) consumes this CSV and computes the `overall`,
-`byUsage`, and `byView` count tables itself, replacing the previous
-hardcoded SURVEY_DATA constants.
+    output/survey_hypotheses.csv — per-hypothesis Likert counts, broken down
+                                  overall, by AI-usage bucket, and by
+                                  AI-view bucket. Drives the three small
+                                  charts under each Hypothesis section.
 
-----------------------------------------------------------------------
-CONFIGURATION
-----------------------------------------------------------------------
-Edit COLUMN_MAP below if your raw CSV uses different column names.
-The script also accepts free-form Likert text and normalizes it, so
-small wording differences in the source data are fine.
+Likert short codes match plots.js: SD, D, SoD, N, SoA, A, SA.
+AI-usage buckets:  Never | Monthly | Weekly | Daily.
+AI-view buckets:   Negative | Neutral | Positive
+                   (negative-leaning, neutral, positive-leaning).
 """
 
 import argparse
 import csv
-import re
-import sys
 from pathlib import Path
 
-
-# ----------------------------------------------------------------------
-# CONFIG: source column names in the raw participant CSV.
-# Adjust these to match your Qualtrics / Prolific export.
-# ----------------------------------------------------------------------
-COLUMN_MAP = {
-    "participant_id": "ResponseId",   # or "PROLIFIC_PID"
-    "ai_usage":       "Q_AI_USAGE",   # frequency-of-AI-use question
-    "ai_view":        "Q_AI_VIEW",    # general view of AI's impact
-    "h1":             "Q_H1",         # Semantic Contraction
-    "h2":             "Q_H2",         # Truth Decay
-    "h3":             "Q_H3",         # Positivity Shift
-    "h4":             "Q_H4",         # Epistemic Islands
-    "h5":             "Q_H5",         # Entropy Dilution
-    "h6":             "Q_H6",         # Stylistic Monoculture
-}
-
-# Rows to skip at the top of a Qualtrics export (the 2 metadata header rows
-# that follow the column-name row). Set to 0 if your CSV has no extras.
-QUALTRICS_METADATA_ROWS = 2
+import pandas as pd
 
 
 # ----------------------------------------------------------------------
-# Normalization tables
+# Column names in the Prolific exports (taken verbatim from
+# analyze_human_study.py — must match the source CSVs exactly).
 # ----------------------------------------------------------------------
 
-# 7-point Likert → canonical short code
+USAGE_COL = "How often do you use AI tools (e.g., ChatGPT, Claude, Gemini)?"
+VIEW_COL  = "In general, how do you view the impact of AI on society as a whole?"
+
+H1_COL = ("As AI content becomes more common on the internet, the range of "
+          "unique ideas and diverse viewpoints seems to be shrinking.")
+H2_COL = ("As AI content becomes more common on the internet, I am encountering "
+          "factually incorrect information and hallucinations more frequently.")
+H3_COL = ("As AI content becomes more common on the internet, online writing "
+          "feels increasingly sanitized and artificially cheerful.")
+H4_COL = ("As AI content becomes more common on the internet, articles are "
+          "increasingly providing answers without including links to external "
+          "sources.")
+# Note: this column name has a stray trailing double-quote in the raw export.
+H6_COL = ('As AI content becomes more common on the internet, distinct '
+          'individual writing styles are disappearing in favor of a generic, '
+          'uniform voice."')
+H5_COL = ("As AI content becomes more common on the internet, content is "
+          "becoming significantly longer in word count while containing less "
+          "actual meaning.")
+
+
+# ----------------------------------------------------------------------
+# Canonical orderings / mappings (match plots.js)
+# ----------------------------------------------------------------------
+
+LIKERT_ORDER = ["SD", "D", "SoD", "N", "SoA", "A", "SA"]
+
 LIKERT_MAP = {
-    "strongly disagree":         "SD",
-    "disagree":                  "D",
-    "somewhat disagree":         "SoD",
-    "slightly disagree":         "SoD",
-    "neither agree nor disagree": "N",
-    "neutral":                   "N",
-    "neither":                   "N",
-    "somewhat agree":            "SoA",
-    "slightly agree":            "SoA",
-    "agree":                     "A",
-    "strongly agree":            "SA",
-    # numeric (1=SD ... 7=SA)
-    "1": "SD", "2": "D", "3": "SoD", "4": "N", "5": "SoA", "6": "A", "7": "SA",
+    "Strongly Disagree":           "SD",
+    "Disagree":                    "D",
+    "Somewhat Disagree":           "SoD",
+    "Neither Agree nor Disagree":  "N",
+    "Somewhat Agree":              "SoA",
+    "Agree":                       "A",
+    "Strongly Agree":              "SA",
 }
 
-# AI-usage frequency → 4 buckets used by the website
+USAGE_ORDER = ["Never", "Monthly", "Weekly", "Daily"]
+
+# Raw responses → 4-bucket usage. The Prolific question uses these exact labels.
 USAGE_MAP = {
-    "never":                "Never",
-    "rarely":               "Never",
-    "less than once a month": "Never",
-    "monthly":              "Monthly",
-    "once a month":         "Monthly",
-    "a few times a month":  "Monthly",
-    "2-3 times a month":    "Monthly",
-    "weekly":               "Weekly",
-    "once a week":          "Weekly",
-    "a few times a week":   "Weekly",
-    "2-3 times a week":     "Weekly",
-    "daily":                "Daily",
-    "every day":            "Daily",
-    "multiple times a day": "Daily",
-    "several times a day":  "Daily",
+    "Never":   "Never",
+    "Monthly": "Monthly",
+    "Weekly":  "Weekly",
+    "Daily":   "Daily",
 }
 
-# General view of AI's impact → 3 buckets
+VIEW_ORDER = ["Negative", "Neutral", "Positive"]
+
+# 7-point sentiment → 3 buckets. Anything containing "Negative" is Negative,
+# anything containing "Positive" is Positive, "Neither..." is Neutral.
 VIEW_MAP = {
-    "very negative":      "Negative",
-    "negative":           "Negative",
-    "somewhat negative":  "Negative",
-    "slightly negative":  "Negative",
-    "mostly negative":    "Negative",
-    "neutral":            "Neutral",
-    "neither":            "Neutral",
-    "mixed":              "Neutral",
-    "no opinion":         "Neutral",
-    "very positive":      "Positive",
-    "positive":           "Positive",
-    "somewhat positive":  "Positive",
-    "slightly positive":  "Positive",
-    "mostly positive":    "Positive",
-    # numeric 1..5 fallback (1=very neg, 5=very pos)
-    "1": "Negative", "2": "Negative", "3": "Neutral", "4": "Positive", "5": "Positive",
+    "Very Negative":                 "Negative",
+    "Negative":                      "Negative",
+    "Somewhat Negative":             "Negative",
+    "Neither Positive nor Negative": "Neutral",
+    "Somewhat Positive":             "Positive",
+    "Positive":                      "Positive",
+    "Very Positive":                 "Positive",
 }
 
 
-def _norm(s):
-    if s is None:
-        return ""
-    s = str(s).strip().lower()
-    s = re.sub(r"\s+", " ", s)
-    s = s.strip(".!?")
-    return s
+# ----------------------------------------------------------------------
+# Helpers
+# ----------------------------------------------------------------------
+
+def _load_part(data_dir: Path, part: int, hyp_cols: dict) -> pd.DataFrame:
+    """Load one Prolific part and return a tidy frame.
+
+    `hyp_cols` maps {short_name: source_column}, e.g. {"h1": H1_COL}.
+    """
+    path = data_dir / f"prolific-part{part}-responses.csv"
+    if not path.exists():
+        raise FileNotFoundError(f"Missing input file: {path}")
+
+    df = pd.read_csv(path)
+
+    out = pd.DataFrame({
+        "participant_id": df["Participant id"],
+        "part":           part,
+        "ai_usage_raw":   df[USAGE_COL],
+        "ai_view_raw":    df[VIEW_COL],
+    })
+    for short, src in hyp_cols.items():
+        out[short] = df[src]
+    return out
 
 
-def _lookup(value, table, field, pid, strict):
-    key = _norm(value)
-    if key in table:
-        return table[key]
-    # try splitting "5 - Strongly agree" style
-    parts = re.split(r"\s*[-–:]\s*", key, maxsplit=1)
-    if len(parts) == 2:
-        for p in parts:
-            if p in table:
-                return table[p]
-    msg = f"  WARN: participant {pid}: unrecognized {field} value: {value!r}"
-    if strict:
-        raise ValueError(msg)
-    print(msg, file=sys.stderr)
-    return ""
+def _bucket(series: pd.Series, mapping: dict) -> pd.Series:
+    return series.map(mapping)
 
 
-def _open_rows(path):
-    """Yield dict rows, skipping Qualtrics metadata rows if present."""
-    with open(path, newline="", encoding="utf-8-sig") as f:
-        reader = csv.reader(f)
-        header = next(reader)
-        # Detect Qualtrics: row 2 is JSON-ish or labels, row 3 is import IDs.
-        # Peek at the next row to decide.
-        peek = next(reader, None)
-        skip = 0
-        if peek and (peek[0].startswith("{") or peek[0].startswith('"{')
-                     or any('ImportId' in c for c in peek)):
-            skip = QUALTRICS_METADATA_ROWS - 1  # we already consumed one
-            for _ in range(skip):
-                next(reader, None)
-        elif peek is not None:
-            # Not a Qualtrics metadata row — yield it as data.
-            yield dict(zip(header, peek))
-        for row in reader:
-            yield dict(zip(header, row))
+def _likert_counts(series: pd.Series) -> dict:
+    """Map full Likert text → short codes and return counts in canonical order."""
+    short = series.map(LIKERT_MAP).dropna()
+    counts = short.value_counts().to_dict()
+    return {code: int(counts.get(code, 0)) for code in LIKERT_ORDER}
 
+
+# ----------------------------------------------------------------------
+# Main
+# ----------------------------------------------------------------------
 
 def main():
-    ap = argparse.ArgumentParser(description=__doc__,
-                                 formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--input", "-i", required=True,
-                    help="Path to raw participant CSV (Qualtrics/Prolific export)")
-    ap.add_argument("--output", "-o", default="output/survey.csv",
-                    help="Output CSV path (default: output/survey.csv)")
-    ap.add_argument("--strict", action="store_true",
-                    help="Fail on any unrecognized response value instead of warning")
+    ap = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    ap.add_argument("--data-dir", default="human_study/data",
+                    help="Directory containing prolific-part{1,2,3}-responses.csv")
+    ap.add_argument("--output-dir", default="output",
+                    help="Where to write survey_overall.csv and survey_hypotheses.csv")
     args = ap.parse_args()
 
-    in_path = Path(args.input)
-    out_path = Path(args.output)
-    out_path.parent.mkdir(parents=True, exist_ok=True)
+    data_dir = Path(args.data_dir)
+    out_dir = Path(args.output_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
 
-    if not in_path.exists():
-        sys.exit(f"ERROR: input file not found: {in_path}")
+    # ------------------------------------------------------------------
+    # Load all three parts
+    # ------------------------------------------------------------------
+    p1 = _load_part(data_dir, 1, {"h1": H1_COL, "h2": H2_COL, "h3": H3_COL})
+    p2 = _load_part(data_dir, 2, {"h4": H4_COL, "h6": H6_COL})
+    p3 = _load_part(data_dir, 3, {"h5": H5_COL})
 
-    out_fields = ["participant_id", "ai_usage", "ai_view",
-                  "h1", "h2", "h3", "h4", "h5", "h6"]
+    print(f"Part 1: {len(p1)} responses (H1, H2, H3)")
+    print(f"Part 2: {len(p2)} responses (H4, H6)")
+    print(f"Part 3: {len(p3)} responses (H5)")
 
-    n_in = 0
-    n_out = 0
-    n_dropped = 0
-    with open(out_path, "w", newline="", encoding="utf-8") as f_out:
-        writer = csv.DictWriter(f_out, fieldnames=out_fields)
-        writer.writeheader()
+    # ------------------------------------------------------------------
+    # OVERALL distributions for the perception section.
+    #
+    # The website's "AI Usage Frequency" and "View of AI Impact" figures
+    # are described as "We surveyed 303 US adults" — that's the Part 1
+    # sample, where H1/H2/H3 are asked. Use Part 1 to drive these two
+    # overall figures so the headline n matches.
+    # ------------------------------------------------------------------
+    overall = p1.copy()
+    overall["ai_usage"] = _bucket(overall["ai_usage_raw"], USAGE_MAP)
+    overall["ai_view"]  = _bucket(overall["ai_view_raw"],  VIEW_MAP)
 
-        for row in _open_rows(in_path):
-            n_in += 1
-            try:
-                pid = row.get(COLUMN_MAP["participant_id"], "").strip()
-                if not pid:
-                    pid = f"p{n_in}"
+    n_overall = int(overall["ai_usage"].notna().sum())
+    usage_counts = (
+        overall["ai_usage"].value_counts()
+        .reindex(USAGE_ORDER, fill_value=0)
+        .astype(int)
+    )
+    view_counts = (
+        overall["ai_view"].value_counts()
+        .reindex(VIEW_ORDER, fill_value=0)
+        .astype(int)
+    )
 
-                usage = _lookup(row.get(COLUMN_MAP["ai_usage"], ""),
-                                USAGE_MAP, "ai_usage", pid, args.strict)
-                view  = _lookup(row.get(COLUMN_MAP["ai_view"], ""),
-                                VIEW_MAP,  "ai_view",  pid, args.strict)
+    overall_path = out_dir / "survey_overall.csv"
+    with open(overall_path, "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["dimension", "bucket", "count", "pct"])
+        for bucket in USAGE_ORDER:
+            c = int(usage_counts[bucket])
+            w.writerow(["ai_usage", bucket, c,
+                        round(c / n_overall * 100, 2) if n_overall else 0])
+        for bucket in VIEW_ORDER:
+            c = int(view_counts[bucket])
+            w.writerow(["ai_view", bucket, c,
+                        round(c / n_overall * 100, 2) if n_overall else 0])
+    print(f"Wrote {overall_path}  (n={n_overall})")
 
-                hyps = {}
-                for h in ("h1", "h2", "h3", "h4", "h5", "h6"):
-                    hyps[h] = _lookup(row.get(COLUMN_MAP[h], ""),
-                                      LIKERT_MAP, h, pid, args.strict)
+    # ------------------------------------------------------------------
+    # PER-HYPOTHESIS Likert counts (overall + by usage + by view).
+    #
+    # Each hypothesis pulls from its own part, so the n per hypothesis
+    # varies (matching the paper's reported 299–303).
+    # ------------------------------------------------------------------
+    hyp_sources = [
+        ("h1", p1, "h1"),
+        ("h2", p1, "h2"),
+        ("h3", p1, "h3"),
+        ("h4", p2, "h4"),
+        ("h5", p3, "h5"),
+        ("h6", p2, "h6"),
+    ]
 
-                # Drop participants missing required fields (matches the
-                # paper's per-hypothesis n of 299–303 — small dropouts).
-                if not usage or not view:
-                    n_dropped += 1
-                    continue
+    hyp_path = out_dir / "survey_hypotheses.csv"
+    with open(hyp_path, "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["hypothesis", "split", "group", "n"] + LIKERT_ORDER)
 
-                writer.writerow({
-                    "participant_id": pid,
-                    "ai_usage": usage,
-                    "ai_view":  view,
-                    **hyps,
-                })
-                n_out += 1
-            except ValueError as e:
-                print(e, file=sys.stderr)
-                n_dropped += 1
+        for hyp_key, part_df, col in hyp_sources:
+            df = part_df.copy()
+            df["ai_usage"] = _bucket(df["ai_usage_raw"], USAGE_MAP)
+            df["ai_view"]  = _bucket(df["ai_view_raw"],  VIEW_MAP)
 
-    print(f"Read     {n_in} rows from {in_path}")
-    print(f"Wrote    {n_out} participants → {out_path}")
-    if n_dropped:
-        print(f"Dropped  {n_dropped} rows (missing usage/view or strict failure)")
+            # Overall row
+            counts = _likert_counts(df[col])
+            n = sum(counts.values())
+            w.writerow([hyp_key, "overall", "all", n] + [counts[c] for c in LIKERT_ORDER])
+
+            # By AI usage
+            for bucket in USAGE_ORDER:
+                sub = df[df["ai_usage"] == bucket]
+                counts = _likert_counts(sub[col])
+                n = sum(counts.values())
+                w.writerow([hyp_key, "by_usage", bucket, n]
+                           + [counts[c] for c in LIKERT_ORDER])
+
+            # By AI view
+            for bucket in VIEW_ORDER:
+                sub = df[df["ai_view"] == bucket]
+                counts = _likert_counts(sub[col])
+                n = sum(counts.values())
+                w.writerow([hyp_key, "by_view", bucket, n]
+                           + [counts[c] for c in LIKERT_ORDER])
+
+    print(f"Wrote {hyp_path}  (6 hypotheses × {1 + len(USAGE_ORDER) + len(VIEW_ORDER)} rows each)")
+
     print()
-    print("Next: copy this file into the website repo at  data/survey.csv")
-    print("      and update assets/scripts/plots.js to load + aggregate it.")
+    print("Next: copy these into the website repo's data/ directory:")
+    print(f"  {overall_path}  ->  data/survey_overall.csv")
+    print(f"  {hyp_path}  ->  data/survey_hypotheses.csv")
 
 
 if __name__ == "__main__":
