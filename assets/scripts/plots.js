@@ -341,7 +341,8 @@ function plotPrevalence(csvRows) {
         margin: { t: 30, r: 30, b: 60, l: 65 },
         xaxis: {
             type: 'date', tickformat: '%b %Y', dtick: 'M3',
-            gridcolor: '#f0f0f0', zeroline: false
+            gridcolor: '#f0f0f0', zeroline: false,
+            range: ['2022-06-01', '2025-06-01']
         },
         yaxis: {
             title: { text: 'Share of Websites (%)', font: { size: 14 } },
@@ -435,22 +436,42 @@ function plotHypothesisTimeSeries(hypKey, hypRows) {
     const signalColor = hyp.confirmed ? COLORS.confirmed : COLORS.scatter;
     const aiColor = COLORS.aiAssisted;
 
+    // Numeric x for linear fitting (months as indices)
+    const xNums = valid.map((_, i) => i);
+
+    const fitSignal = linearFit(xNums, signal);
+    const fitAI = linearFit(xNums, aiLikelihood);
+    const trendSignalY = xNums.map(x => fitSignal.slope * x + fitSignal.intercept);
+    const trendAIY = xNums.map(x => fitAI.slope * x + fitAI.intercept);
+
     const traceSignal = {
         x: months, y: signal, name: hyp.yLabel,
-        type: 'scatter', mode: 'lines+markers',
-        line: { color: signalColor, width: 2.5, shape: 'spline' },
-        marker: { color: signalColor, size: 4 },
+        type: 'scatter', mode: 'markers',
+        marker: { color: signalColor, size: 5, opacity: 0.5 },
         yaxis: 'y',
         hovertemplate: `%{x|%b %Y}<br>${hyp.yLabel}: %{y:.4f}<extra></extra>`
     };
 
+    const traceSignalTrend = {
+        x: months, y: trendSignalY, name: hyp.yLabel + ' (trend)',
+        type: 'scatter', mode: 'lines',
+        line: { color: signalColor, width: 2.5 },
+        yaxis: 'y', showlegend: false, hoverinfo: 'skip'
+    };
+
     const traceAI = {
         x: months, y: aiLikelihood, name: 'AI Likelihood',
-        type: 'scatter', mode: 'lines+markers',
-        line: { color: aiColor, width: 2.5, shape: 'spline', dash: 'dash' },
-        marker: { color: aiColor, size: 4 },
+        type: 'scatter', mode: 'markers',
+        marker: { color: aiColor, size: 5, opacity: 0.5 },
         yaxis: 'y2',
         hovertemplate: '%{x|%b %Y}<br>AI Likelihood: %{y:.3f}<extra></extra>'
+    };
+
+    const traceAITrend = {
+        x: months, y: trendAIY, name: 'AI Likelihood (trend)',
+        type: 'scatter', mode: 'lines',
+        line: { color: aiColor, width: 2.5, dash: 'dash' },
+        yaxis: 'y2', showlegend: false, hoverinfo: 'skip'
     };
 
     const layout = {
@@ -483,7 +504,7 @@ function plotHypothesisTimeSeries(hypKey, hypRows) {
         hovermode: 'x unified'
     };
 
-    Plotly.newPlot(`timeseries-${hypKey}`, [traceSignal, traceAI], layout, PLOTLY_CONFIG);
+    Plotly.newPlot(`timeseries-${hypKey}`, [traceSignal, traceSignalTrend, traceAI, traceAITrend], layout, PLOTLY_CONFIG);
 }
 
 function plotSurveyOverall(hypKey) {
