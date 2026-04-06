@@ -442,8 +442,11 @@ function plotHypothesisTimeSeries(hypKey, hypRows) {
     const signalColor = hyp.confirmed ? COLORS.confirmed : COLORS.scatter;
     const aiColor = COLORS.aiAssisted;
 
-    // Numeric x for linear fitting (months as indices)
-    const xNums = valid.map((_, i) => i);
+    // Use actual temporal positions (months since epoch) for linear fitting
+    const xNums = valid.map(r => {
+        const [y, m] = r.month.split('-');
+        return parseInt(y) * 12 + parseInt(m);
+    });
 
     const fitSignal = linearFit(xNums, signal);
     const fitAI = linearFit(xNums, aiLikelihood);
