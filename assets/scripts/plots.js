@@ -564,7 +564,7 @@ function plotSurveyByUsage(hypKey) {
         font: { family: FONT_FAMILY, color: '#353535' },
         margin: { t: 8, r: 10, b: 45, l: 45 },
         barmode: 'stack',
-        xaxis: { title: { text: 'AI Usage Frequency', font: { size: 11 } }, tickfont: { size: 11 }, fixedrange: true },
+        xaxis: { tickfont: { size: 11 }, fixedrange: true },
         yaxis: { title: { text: '%', font: { size: 12 } }, gridcolor: '#f0f0f0', zeroline: false, fixedrange: true, range: [0, 105] },
         plot_bgcolor: 'white', paper_bgcolor: 'white', showlegend: false, bargap: 0.2
     }, PLOTLY_CONFIG);
@@ -592,7 +592,7 @@ function plotSurveyByView(hypKey) {
         font: { family: FONT_FAMILY, color: '#353535' },
         margin: { t: 8, r: 10, b: 45, l: 45 },
         barmode: 'stack',
-        xaxis: { title: { text: 'View of AI Impact', font: { size: 11 } }, tickfont: { size: 11 }, fixedrange: true },
+        xaxis: { tickfont: { size: 11 }, fixedrange: true },
         yaxis: { title: { text: '%', font: { size: 12 } }, gridcolor: '#f0f0f0', zeroline: false, fixedrange: true, range: [0, 105] },
         plot_bgcolor: 'white', paper_bgcolor: 'white', showlegend: false, bargap: 0.2
     }, PLOTLY_CONFIG);
@@ -639,16 +639,56 @@ function plotHypothesisSummary() {
     }, PLOTLY_CONFIG);
 }
 
-function plotSurveyLegend() {
+function plotSurveyLegends() {
     const categories = ['SD', 'D', 'SoD', 'N', 'SoA', 'A', 'SA'];
     const fullNames = ['Strongly Disagree', 'Disagree', 'Somewhat Disagree', 'Neutral', 'Somewhat Agree', 'Agree', 'Strongly Agree'];
-    const container = document.getElementById('survey-legend');
-    if (!container) return;
-    container.innerHTML = categories.map((cat, i) =>
+    const html = categories.map((cat, i) =>
         `<span style="display:inline-flex;align-items:center;margin-right:1em;margin-bottom:0.3em;font-size:12px;font-family:${FONT_FAMILY};color:#555;">` +
         `<span style="display:inline-block;width:12px;height:12px;border-radius:2px;background:${COLORS.likert[cat]};margin-right:4px;"></span>` +
         `${fullNames[i]}</span>`
     ).join('');
+    document.querySelectorAll('.survey-legend-inline').forEach(el => { el.innerHTML = html; });
+}
+
+function plotOverallSurveyDistributions() {
+    // Usage distribution (computed from H1 byUsage totals — same respondents across all hypotheses)
+    const h1 = SURVEY_DATA.h1;
+    const usageGroups = ["Never", "Monthly", "Weekly", "Daily"];
+    const usageCounts = usageGroups.map(g => Object.values(h1.byUsage[g]).reduce((a, b) => a + b, 0));
+    const usageTotal = usageCounts.reduce((a, b) => a + b, 0);
+    const usagePcts = usageCounts.map(c => Math.round(c / usageTotal * 1000) / 10);
+
+    Plotly.newPlot('survey-usage-overall', [{
+        x: usageGroups, y: usagePcts, type: 'bar',
+        marker: { color: '#3498db', line: { color: 'white', width: 1 } },
+        hovertemplate: '%{x}: %{y:.1f}%<extra></extra>', showlegend: false,
+        text: usagePcts.map(v => v.toFixed(1) + '%'), textposition: 'outside'
+    }], {
+        font: { family: FONT_FAMILY, color: '#353535' },
+        margin: { t: 20, r: 10, b: 40, l: 45 },
+        xaxis: { tickfont: { size: 12 }, fixedrange: true },
+        yaxis: { title: { text: '%', font: { size: 12 } }, gridcolor: '#f0f0f0', zeroline: false, fixedrange: true, range: [0, Math.max(...usagePcts) * 1.2] },
+        plot_bgcolor: 'white', paper_bgcolor: 'white', bargap: 0.25
+    }, PLOTLY_CONFIG);
+
+    // View distribution
+    const viewGroups = ["Negative", "Neutral", "Positive"];
+    const viewCounts = viewGroups.map(g => Object.values(h1.byView[g]).reduce((a, b) => a + b, 0));
+    const viewTotal = viewCounts.reduce((a, b) => a + b, 0);
+    const viewPcts = viewCounts.map(c => Math.round(c / viewTotal * 1000) / 10);
+
+    Plotly.newPlot('survey-view-overall', [{
+        x: viewGroups, y: viewPcts, type: 'bar',
+        marker: { color: '#8e44ad', line: { color: 'white', width: 1 } },
+        hovertemplate: '%{x}: %{y:.1f}%<extra></extra>', showlegend: false,
+        text: viewPcts.map(v => v.toFixed(1) + '%'), textposition: 'outside'
+    }], {
+        font: { family: FONT_FAMILY, color: '#353535' },
+        margin: { t: 20, r: 10, b: 40, l: 45 },
+        xaxis: { tickfont: { size: 12 }, fixedrange: true },
+        yaxis: { title: { text: '%', font: { size: 12 } }, gridcolor: '#f0f0f0', zeroline: false, fixedrange: true, range: [0, Math.max(...viewPcts) * 1.2] },
+        plot_bgcolor: 'white', paper_bgcolor: 'white', bargap: 0.25
+    }, PLOTLY_CONFIG);
 }
 
 // ============================================================
@@ -684,6 +724,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
 
     plotPrevalence(prevalenceData);
+    plotOverallSurveyDistributions();
     plotHypothesisSummary();
 
     const hypotheses = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
@@ -695,7 +736,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         plotSurveyByView(h);
     });
 
-    plotSurveyLegend();
+    plotSurveyLegends();
 
     window.addEventListener('resize', function() {
         document.querySelectorAll('.js-plotly-plot').forEach(el => {

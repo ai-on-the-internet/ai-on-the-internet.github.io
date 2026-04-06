@@ -43,8 +43,8 @@
                         <sup>2</sup> Internet Archive &nbsp;&nbsp;
                         <sup>3</sup> Stanford University
                     </p>
-                    <p class="abstract">
-                        We construct a representative sample of websites published on the internet between 2022 and 2025 using the Internet Archive, and apply a state-of-the-art AI text detector. By mid-2025, roughly <b>35% of newly published websites</b> were classified as AI-generated or AI-assisted, up from zero before ChatGPT's launch in late 2022. We find statistically significant evidence that increases in AI-generated text correlate negatively with semantic diversity and positively with the prevalence of positive sentiment, but we do not find evidence for decreased factual accuracy or stylistic diversity. This diverges from public perception: in a survey of US adults, the majority believed in all of these negative impacts.
+                    <p class="abstract" style="text-align: justify;">
+                        The proliferation of AI-generated and AI-assisted text on the internet is feared to contribute to a degradation in semantic and stylistic diversity, factual accuracy, and other negative developments. To this end, we construct a representative sample of websites published on the internet between 2022 and 2025 using the Internet Archive, and apply a state-of-the-art AI text detector on them. We find that by mid-2025, roughly <b>35% of newly published websites</b> were classified as AI-generated or AI-assisted, up from zero before ChatGPT's launch in late 2022. We also find statistically significant evidence for some of the identified hypotheses; for example, that increases in AI-generated text on the internet correlate negatively with semantic diversity and positively with the prevalence of positive sentiment. We do not, however, find statistically significant evidence supporting the hypothesis that an increased rate of AI-generated text on the internet decreases factual accuracy or stylistic diversity. Notably, this diverges from public perception, which we measure in a user study, where the majority of US adults turned out to believe in all four of the above-mentioned hypotheses. Individuals who do not use AI or use it infrequently tend to believe in these negative impacts more than those who use it frequently; similarly, individuals who hold negative views of AI tend to believe in these hypotheses more than those with favorable views of the technology.
                     </p>
 
                     <div class="info">
@@ -58,24 +58,18 @@
         </div>
     </div>
 
-    <!-- Key Findings -->
+    <!-- Introduction -->
     <div class="container blog main first" id="blog-main">
-        <fieldset class="insights-box">
-            <legend>Key Findings</legend>
-            <ul style="margin-left: 1.5em; margin-bottom: 0;">
-                <li style="margin-bottom: 0.8em;">~35% of new websites are AI-generated or AI-assisted by mid-2025, up from effectively zero before ChatGPT's launch in November 2022.</li>
-                <li style="margin-bottom: 0.8em;">We find evidence that the rise of AI-generated text on the internet brings about a semantic contraction (reduced diversity of topics) and a positivity shift (increased positive sentiment).</li>
-                <li style="margin-bottom: 0.8em;">The majority of US adults believe in all six tested negative impacts of AI-generated text on the internet, while we only confirm two.</li>
-                <li style="margin-bottom: 0.0em;">Beliefs correlate with AI usage and favorability: infrequent AI users and AI skeptics are significantly more likely to believe in negative impacts of AI-generated text on the internet.</li>
-            </ul>
-        </fieldset>
+        <p class="text" style="text-align: justify;">
+            AI has been moving at an unprecedented speed, changing the way people write, communicate, and work. Existing research has pointed to AI's tendency to <a href="https://arxiv.org/abs/2309.01219">hallucinate</a>, exhibit <a href="https://arxiv.org/abs/2310.13548">sycophancy</a>, and other potentially <a href="https://arxiv.org/abs/2402.04679">undesirable behaviors</a> on the level of individual generations. However, no research has so far studied the impact of this technology on the online discourse as a whole. We collected a sample of websites published between 2022 and 2025 to study these phenomena and answer the following questions: (1)&nbsp;How much new text on the Internet is AI-generated? (2)&nbsp;What is the public's perception of AI's impact on the internet? and (3)&nbsp;How does AI-generated text actually impact online discourse?
+        </p>
     </div>
 
     <!-- Prevalence Section -->
     <div class="container blog main">
-        <h1>AI-Generated Text on the Internet</h1>
+        <h1>How much new text on the Internet is AI-generated?</h1>
         <p class="text" style="font-size: 90%; color: #666;">
-            We construct a representative sample of websites published on the internet between mid-2022 and mid-2025 using the Internet Archive, and apply a state-of-the-art AI text detector (Pangram v3). The following figure shows the proportion of websites classified as AI-generated or AI-assisted over time.
+            TBD
         </p>
     </div>
 
@@ -86,13 +80,33 @@
         </p>
     </div>
 
-    <!-- Shared legend -->
+    <!-- Public Perception Section -->
     <div class="container blog main" style="padding-top: 2vh;">
-        <h1>Hypothesis Results &amp; Participant Study</h1>
+        <h1>What is the public's perception of AI's impact on the internet?</h1>
+        <p class="text" style="font-size: 90%; color: #666;">
+            We surveyed 303 US adults about their AI usage habits, their general view of AI's impact on society, and their beliefs about six specific hypothesized negative impacts of AI-generated text on the internet.
+        </p>
+    </div>
+
+    <div class="container blog large gray">
+        <div class="survey-grid" style="grid-template-columns: 1fr 1fr;">
+            <div>
+                <div class="plot-container plot-bordered" id="survey-usage-overall" style="width:100%; height:280px;"></div>
+                <p class="caption" style="text-align: center;"><b>AI Usage Frequency.</b> Distribution of respondents by how often they use AI tools.</p>
+            </div>
+            <div>
+                <div class="plot-container plot-bordered" id="survey-view-overall" style="width:100%; height:280px;"></div>
+                <p class="caption" style="text-align: center;"><b>View of AI Impact.</b> Distribution of respondents by their general view of AI's impact on society.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hypothesis Results -->
+    <div class="container blog main" style="padding-top: 2vh;">
+        <h1>How Does AI-Generated Text Actually Impact Online Discourse?</h1>
         <p class="text" style="font-size: 90%; color: #666;">
             For each hypothesis, we show (a) the correlation between the measured signal and AI prevalence across monthly samples, (b) the overall distribution of participant survey responses, (c) responses broken down by AI usage frequency, and (d) responses by general view of AI's impact on society.
         </p>
-        <div id="survey-legend" style="margin: 1.5vh 0 0.5vh 0;"></div>
     </div>
 
     <!-- ============ HYPOTHESIS 1 ============ -->
@@ -122,17 +136,18 @@
         <div class="survey-grid">
             <div>
                 <div class="plot-container" id="survey-overall-h1" style="width:100%; height:260px;"></div>
-                <p class="caption"><b>(b) Overall survey responses.</b> 60.9% lean towards agreement.</p>
+                <p class="caption" style="text-align: center;"><b>(b) Overall survey responses.</b></p>
             </div>
             <div>
                 <div class="plot-container" id="survey-usage-h1" style="width:100%; height:260px;"></div>
-                <p class="caption"><b>(c) By AI usage frequency.</b></p>
+                <p class="caption" style="text-align: center;"><b>(c) By AI usage frequency.</b></p>
             </div>
             <div>
                 <div class="plot-container" id="survey-view-h1" style="width:100%; height:260px;"></div>
-                <p class="caption"><b>(d) By view of AI impact.</b></p>
+                <p class="caption" style="text-align: center;"><b>(d) By view of AI impact.</b></p>
             </div>
         </div>
+        <div class="survey-legend-inline"></div>
     </div>
 
     <!-- ============ HYPOTHESIS 2 ============ -->
@@ -162,17 +177,18 @@
         <div class="survey-grid">
             <div>
                 <div class="plot-container" id="survey-overall-h2" style="width:100%; height:260px;"></div>
-                <p class="caption"><b>(b) Overall survey responses.</b> 75.1% lean towards agreement.</p>
+                <p class="caption" style="text-align: center;"><b>(b) Overall survey responses.</b></p>
             </div>
             <div>
                 <div class="plot-container" id="survey-usage-h2" style="width:100%; height:260px;"></div>
-                <p class="caption"><b>(c) By AI usage frequency.</b></p>
+                <p class="caption" style="text-align: center;"><b>(c) By AI usage frequency.</b></p>
             </div>
             <div>
                 <div class="plot-container" id="survey-view-h2" style="width:100%; height:260px;"></div>
-                <p class="caption"><b>(d) By view of AI impact.</b></p>
+                <p class="caption" style="text-align: center;"><b>(d) By view of AI impact.</b></p>
             </div>
         </div>
+        <div class="survey-legend-inline"></div>
     </div>
 
     <!-- ============ HYPOTHESIS 3 ============ -->
@@ -202,17 +218,18 @@
         <div class="survey-grid">
             <div>
                 <div class="plot-container" id="survey-overall-h3" style="width:100%; height:260px;"></div>
-                <p class="caption"><b>(b) Overall survey responses.</b> 72.0% lean towards agreement.</p>
+                <p class="caption" style="text-align: center;"><b>(b) Overall survey responses.</b></p>
             </div>
             <div>
                 <div class="plot-container" id="survey-usage-h3" style="width:100%; height:260px;"></div>
-                <p class="caption"><b>(c) By AI usage frequency.</b></p>
+                <p class="caption" style="text-align: center;"><b>(c) By AI usage frequency.</b></p>
             </div>
             <div>
                 <div class="plot-container" id="survey-view-h3" style="width:100%; height:260px;"></div>
-                <p class="caption"><b>(d) By view of AI impact.</b></p>
+                <p class="caption" style="text-align: center;"><b>(d) By view of AI impact.</b></p>
             </div>
         </div>
+        <div class="survey-legend-inline"></div>
     </div>
 
     <!-- ============ HYPOTHESIS 4 ============ -->
@@ -242,17 +259,18 @@
         <div class="survey-grid">
             <div>
                 <div class="plot-container" id="survey-overall-h4" style="width:100%; height:260px;"></div>
-                <p class="caption"><b>(b) Overall survey responses.</b> 69.9% lean towards agreement.</p>
+                <p class="caption" style="text-align: center;"><b>(b) Overall survey responses.</b></p>
             </div>
             <div>
                 <div class="plot-container" id="survey-usage-h4" style="width:100%; height:260px;"></div>
-                <p class="caption"><b>(c) By AI usage frequency.</b></p>
+                <p class="caption" style="text-align: center;"><b>(c) By AI usage frequency.</b></p>
             </div>
             <div>
                 <div class="plot-container" id="survey-view-h4" style="width:100%; height:260px;"></div>
-                <p class="caption"><b>(d) By view of AI impact.</b></p>
+                <p class="caption" style="text-align: center;"><b>(d) By view of AI impact.</b></p>
             </div>
         </div>
+        <div class="survey-legend-inline"></div>
     </div>
 
     <!-- ============ HYPOTHESIS 5 ============ -->
@@ -282,17 +300,18 @@
         <div class="survey-grid">
             <div>
                 <div class="plot-container" id="survey-overall-h5" style="width:100%; height:260px;"></div>
-                <p class="caption"><b>(b) Overall survey responses.</b> 60.7% lean towards agreement.</p>
+                <p class="caption" style="text-align: center;"><b>(b) Overall survey responses.</b></p>
             </div>
             <div>
                 <div class="plot-container" id="survey-usage-h5" style="width:100%; height:260px;"></div>
-                <p class="caption"><b>(c) By AI usage frequency.</b></p>
+                <p class="caption" style="text-align: center;"><b>(c) By AI usage frequency.</b></p>
             </div>
             <div>
                 <div class="plot-container" id="survey-view-h5" style="width:100%; height:260px;"></div>
-                <p class="caption"><b>(d) By view of AI impact.</b></p>
+                <p class="caption" style="text-align: center;"><b>(d) By view of AI impact.</b></p>
             </div>
         </div>
+        <div class="survey-legend-inline"></div>
     </div>
 
     <!-- ============ HYPOTHESIS 6 ============ -->
@@ -322,17 +341,18 @@
         <div class="survey-grid">
             <div>
                 <div class="plot-container" id="survey-overall-h6" style="width:100%; height:260px;"></div>
-                <p class="caption"><b>(b) Overall survey responses.</b> 83.0% lean towards agreement.</p>
+                <p class="caption" style="text-align: center;"><b>(b) Overall survey responses.</b></p>
             </div>
             <div>
                 <div class="plot-container" id="survey-usage-h6" style="width:100%; height:260px;"></div>
-                <p class="caption"><b>(c) By AI usage frequency.</b></p>
+                <p class="caption" style="text-align: center;"><b>(c) By AI usage frequency.</b></p>
             </div>
             <div>
                 <div class="plot-container" id="survey-view-h6" style="width:100%; height:260px;"></div>
-                <p class="caption"><b>(d) By view of AI impact.</b></p>
+                <p class="caption" style="text-align: center;"><b>(d) By view of AI impact.</b></p>
             </div>
         </div>
+        <div class="survey-legend-inline"></div>
     </div>
 
     <!-- Summary: Evidence vs. Belief -->
@@ -360,6 +380,15 @@
   author={Dolezal, Jonas and Alam, Sawood and Graham, Mark and Bohacek, Maty},
   year={2025}
 }</code></pre>
+    </div>
+
+    <!-- Acknowledgements -->
+    <div class="container blog main" style="padding-top: 3vh;">
+        <hr class="section-divider">
+        <h1>Acknowledgements</h1>
+        <p class="text" style="font-size: 90%; color: #666;">
+            The authors thank Pangram for providing a research grant supporting the use of their API. We also thank Liam Duggan, Hany Farid, Daphne Ippolito, Shayne Longpre, Rob Reich, and Alexander Wang for helpful discussions (listed in alphabetical order).
+        </p>
     </div>
 
     <!-- Footer -->
