@@ -300,6 +300,7 @@ function plotPrevalence(csvRows) {
     });
 
     const traces = [
+        // Confidence bands (back)
         {
             x: [...smoothMonths, ...smoothMonths.slice().reverse()],
             y: [...fitCombined.yUpper, ...fitCombined.yLower.slice().reverse()],
@@ -314,12 +315,7 @@ function plotPrevalence(csvRows) {
             line: { color: 'transparent' }, type: 'scatter', mode: 'lines',
             showlegend: false, hoverinfo: 'skip'
         },
-        {
-            x: months, y: aiCombined, name: '', type: 'scatter', mode: 'markers',
-            marker: { color: COLORS.aiAssisted, size: 6, opacity: 0.4, symbol: 'square' },
-            hovertemplate: '<b>%{text}</b><br>AI-Gen. or Assisted: %{y:.1f}%<extra></extra>',
-            text: monthLabels, showlegend: false
-        },
+        // Red (generated) — drawn first so purple goes on top
         {
             x: months, y: aiGenerated, name: '', type: 'scatter', mode: 'markers',
             marker: { color: COLORS.aiGenerated, size: 6, opacity: 0.4, symbol: 'circle' },
@@ -327,14 +323,21 @@ function plotPrevalence(csvRows) {
             text: monthLabels, showlegend: false
         },
         {
-            x: smoothMonths, y: fitCombined.ySmooth, name: 'AI-Generated or AI-Assisted',
-            type: 'scatter', mode: 'lines',
-            line: { color: COLORS.aiAssisted, width: 2.5 }, hoverinfo: 'skip'
-        },
-        {
             x: smoothMonths, y: fitGenerated.ySmooth, name: 'Fully AI-Generated',
             type: 'scatter', mode: 'lines',
             line: { color: COLORS.aiGenerated, width: 2.5 }, hoverinfo: 'skip'
+        },
+        // Purple (combined) — drawn last so it's on top
+        {
+            x: months, y: aiCombined, name: '', type: 'scatter', mode: 'markers',
+            marker: { color: COLORS.aiAssisted, size: 7, opacity: 0.5, symbol: 'square' },
+            hovertemplate: '<b>%{text}</b><br>AI-Gen. or Assisted: %{y:.1f}%<extra></extra>',
+            text: monthLabels, showlegend: false
+        },
+        {
+            x: smoothMonths, y: fitCombined.ySmooth, name: 'AI-Generated or AI-Assisted',
+            type: 'scatter', mode: 'lines',
+            line: { color: COLORS.aiAssisted, width: 2.5 }, hoverinfo: 'skip'
         }
     ];
 
