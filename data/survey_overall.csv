@@ -1,0 +1,8 @@
+dimension,bucket,count,pct
+ai_usage,Never,38,12.67
+ai_usage,Monthly,49,16.33
+ai_usage,Weekly,102,34.0
+ai_usage,Daily,111,37.0
+ai_view,Negative,89,29.67
+ai_view,Neutral,35,11.67
+ai_view,Positive,132,44.0
