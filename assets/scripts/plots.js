@@ -12,35 +12,148 @@ function mulberry32(a) {
     };
 }
 
-// Generate prevalence data (logistic growth)
+// Generate prevalence data with scatter noise (like the paper)
 function generatePrevalenceData() {
     const months = [];
     const labels = [];
     const aiGenerated = [];
     const aiGeneratedOrAssisted = [];
+    const xIndices = [];
 
     const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const rand = mulberry32(314);
 
     // Aug 2022 (month 0) to May 2025 (month 33)
     for (let i = 0; i <= 33; i++) {
-        const monthIdx = (8 + i - 1) % 12; // Aug=7 (0-indexed)
+        const monthIdx = (8 + i - 1) % 12;
         const year = 2022 + Math.floor((7 + i) / 12);
         const m = monthIdx + 1;
         months.push(`${year}-${String(m).padStart(2, '0')}-15`);
         labels.push(`${monthNames[monthIdx]} ${year}`);
+        xIndices.push(i);
 
-        // Logistic growth for AI-gen+assisted
-        // L=0.38, k=0.20, t0=21
+        // Logistic growth for AI-gen+assisted with scatter noise
         const assisted = 0.38 / (1 + Math.exp(-0.20 * (i - 21)));
-        // Logistic growth for AI-gen only
-        // L=0.155, k=0.20, t0=22
         const generated = 0.155 / (1 + Math.exp(-0.20 * (i - 22)));
 
-        aiGeneratedOrAssisted.push(Math.round(assisted * 1000) / 10);
-        aiGenerated.push(Math.round(generated * 1000) / 10);
+        // Add noise to scatter points (proportional to value, more realistic)
+        const noiseAssisted = (rand() - 0.5) * 0.04 * Math.max(0.3, assisted / 0.38);
+        const noiseGenerated = (rand() - 0.5) * 0.025 * Math.max(0.3, generated / 0.155);
+
+        aiGeneratedOrAssisted.push(Math.round(Math.max(0, assisted + noiseAssisted) * 1000) / 10);
+        aiGenerated.push(Math.round(Math.max(0, generated + noiseGenerated) * 1000) / 10);
     }
 
-    return { months, labels, aiGenerated, aiGeneratedOrAssisted };
+    return { months, labels, aiGenerated, aiGeneratedOrAssisted, xIndices };
+}
+
+// Fit a polynomial of given degree and return smooth curve + confidence band
+function polyFit(xArr, yArr, degree, nSmooth) {
+    const n = xArr.length;
+    degree = Math.min(degree, n - 1);
+
+    // Normalize x to [-1, 1] for numerical stability
+    const xMin = Math.min(...xArr);
+    const xMax = Math.max(...xArr);
+    const xRange = xMax - xMin || 1;
+    const xNorm = xArr.map(x => (x - xMin) / xRange * 2 - 1);
+
+    // Build Vandermonde matrix and solve via normal equations
+    // coeffs[0] = highest degree
+    const coeffs = polyFitCoeffs(xNorm, yArr, degree);
+
+    // Evaluate smooth curve
+    const xSmooth = [];
+    for (let i = 0; i < nSmooth; i++) {
+        xSmooth.push(xMin + (xMax - xMin) * i / (nSmooth - 1));
+    }
+    const xSmoothNorm = xSmooth.map(x => (x - xMin) / xRange * 2 - 1);
+
+    const ySmooth = xSmoothNorm.map(x => polyEval(coeffs, x));
+
+    // Residual std error for confidence band
+    const yPred = xNorm.map(x => polyEval(coeffs, x));
+    const residuals = yArr.map((y, i) => y - yPred[i]);
+    const stdErr = Math.sqrt(residuals.reduce((s, r) => s + r * r, 0) / n);
+
+    const yUpper = ySmooth.map(y => Math.max(0, Math.min(y + stdErr, 100)));
+    const yLower = ySmooth.map(y => Math.max(0, Math.min(y - stdErr, 100)));
+    const yClamped = ySmooth.map(y => Math.max(0, Math.min(y, 100)));
+
+    return { xSmooth, ySmooth: yClamped, yUpper, yLower };
+}
+
+function polyEval(coeffs, x) {
+    let result = 0;
+    for (let i = 0; i < coeffs.length; i++) {
+        result = result * x + coeffs[i];
+    }
+    return result;
+}
+
+// Simple polynomial fitting using least squares (normal equations)
+function polyFitCoeffs(x, y, degree) {
+    const n = x.length;
+    const m = degree + 1;
+
+    // Build Vandermonde matrix V[i][j] = x[i]^(degree-j)
+    const V = [];
+    for (let i = 0; i < n; i++) {
+        const row = [];
+        for (let j = 0; j < m; j++) {
+            row.push(Math.pow(x[i], degree - j));
+        }
+        V.push(row);
+    }
+
+    // Compute V^T * V
+    const VtV = [];
+    for (let i = 0; i < m; i++) {
+        VtV.push([]);
+        for (let j = 0; j < m; j++) {
+            let sum = 0;
+            for (let k = 0; k < n; k++) sum += V[k][i] * V[k][j];
+            VtV[i].push(sum);
+        }
+    }
+
+    // Compute V^T * y
+    const Vty = [];
+    for (let i = 0; i < m; i++) {
+        let sum = 0;
+        for (let k = 0; k < n; k++) sum += V[k][i] * y[k];
+        Vty.push(sum);
+    }
+
+    // Solve via Gaussian elimination
+    return gaussianSolve(VtV, Vty);
+}
+
+function gaussianSolve(A, b) {
+    const n = A.length;
+    // Augment
+    const M = A.map((row, i) => [...row, b[i]]);
+
+    for (let col = 0; col < n; col++) {
+        // Partial pivoting
+        let maxRow = col;
+        for (let row = col + 1; row < n; row++) {
+            if (Math.abs(M[row][col]) > Math.abs(M[maxRow][col])) maxRow = row;
+        }
+        [M[col], M[maxRow]] = [M[maxRow], M[col]];
+
+        const pivot = M[col][col];
+        if (Math.abs(pivot) < 1e-12) continue;
+
+        for (let j = col; j <= n; j++) M[col][j] /= pivot;
+        for (let row = 0; row < n; row++) {
+            if (row === col) continue;
+            const factor = M[row][col];
+            for (let j = col; j <= n; j++) M[row][j] -= factor * M[col][j];
+        }
+    }
+
+    return M.map(row => row[n]);
 }
 
 // Generate correlated scatter data for a hypothesis
@@ -72,6 +185,37 @@ function generateScatterData(rho, seed, yMean, yStd, yLabel) {
     }
 
     return points;
+}
+
+// Generate time-series data for dual-axis plot
+function generateTimeSeriesData(rho, seed, yMean, yStd) {
+    const rand = mulberry32(seed + 1000);
+    const n = 36;
+    const months = [];
+    const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+    const aiLikelihood = [];
+    const signal = [];
+
+    for (let i = 0; i < n; i++) {
+        const monthIdx = (8 + i - 1) % 12;
+        const year = 2022 + Math.floor((7 + i) / 12);
+        const m = monthIdx + 1;
+        months.push(`${year}-${String(m).padStart(2, '0')}-15`);
+
+        // AI likelihood follows logistic growth
+        const aiBase = 0.35 / (1 + Math.exp(-0.22 * (i - 18)));
+        const ai = aiBase + (rand() - 0.5) * 0.02;
+        aiLikelihood.push(Math.round(ai * 1000) / 1000);
+
+        // Signal is correlated with AI likelihood via rho
+        const aiNorm = (ai - 0.15) / 0.10;
+        const yNorm = rho * aiNorm + Math.sqrt(1 - rho * rho) * gaussianRand(rand);
+        const y = yMean + yStd * yNorm;
+        signal.push(Math.round(y * 10000) / 10000);
+    }
+
+    return { months, aiLikelihood, signal };
 }
 
 function gaussianRand(rand) {
@@ -247,34 +391,106 @@ const COLORS = {
 
 function plotPrevalence() {
     const data = generatePrevalenceData();
+    const degree = 6;
+    const nSmooth = 300;
 
-    const trace1 = {
+    // Fit degree-6 polynomial for both series (matching paper)
+    const fitAssisted = polyFit(data.xIndices, data.aiGeneratedOrAssisted, degree, nSmooth);
+    const fitGenerated = polyFit(data.xIndices, data.aiGenerated, degree, nSmooth);
+
+    // Map smooth x indices back to dates
+    const smoothMonths = fitAssisted.xSmooth.map(xi => {
+        const monthIdx = (8 + Math.round(xi) - 1) % 12;
+        const year = 2022 + Math.floor((7 + xi) / 12);
+        const m = ((8 + xi - 1) % 12) + 1;
+        const mInt = Math.floor(m) + 1;
+        const day = Math.round((m - Math.floor(m)) * 28) + 1;
+        // Interpolate date
+        const frac = xi;
+        const baseMonth = Math.floor(frac);
+        const remainder = frac - baseMonth;
+        if (baseMonth >= 0 && baseMonth < data.months.length - 1) {
+            const d0 = new Date(data.months[baseMonth]);
+            const d1 = new Date(data.months[Math.min(baseMonth + 1, data.months.length - 1)]);
+            return new Date(d0.getTime() + remainder * (d1.getTime() - d0.getTime())).toISOString().slice(0, 10);
+        } else if (baseMonth >= data.months.length - 1) {
+            return data.months[data.months.length - 1];
+        }
+        return data.months[0];
+    });
+
+    // Scatter points for raw data
+    const scatterAssisted = {
         x: data.months,
         y: data.aiGeneratedOrAssisted,
+        name: '',
+        type: 'scatter',
+        mode: 'markers',
+        marker: { color: COLORS.aiAssisted, size: 6, opacity: 0.4, symbol: 'square' },
+        hovertemplate: '<b>%{text}</b><br>AI-Gen. or Assisted: %{y:.1f}%<extra></extra>',
+        text: data.labels,
+        showlegend: false
+    };
+
+    const scatterGenerated = {
+        x: data.months,
+        y: data.aiGenerated,
+        name: '',
+        type: 'scatter',
+        mode: 'markers',
+        marker: { color: COLORS.aiGenerated, size: 6, opacity: 0.4, symbol: 'circle' },
+        hovertemplate: '<b>%{text}</b><br>Fully AI-Generated: %{y:.1f}%<extra></extra>',
+        text: data.labels,
+        showlegend: false
+    };
+
+    // Confidence band for assisted
+    const bandAssisted = {
+        x: [...smoothMonths, ...smoothMonths.slice().reverse()],
+        y: [...fitAssisted.yUpper, ...fitAssisted.yLower.slice().reverse()],
+        fill: 'toself',
+        fillcolor: 'rgba(142, 68, 173, 0.15)',
+        line: { color: 'transparent' },
+        type: 'scatter',
+        mode: 'lines',
+        showlegend: false,
+        hoverinfo: 'skip'
+    };
+
+    // Confidence band for generated
+    const bandGenerated = {
+        x: [...smoothMonths, ...smoothMonths.slice().reverse()],
+        y: [...fitGenerated.yUpper, ...fitGenerated.yLower.slice().reverse()],
+        fill: 'toself',
+        fillcolor: 'rgba(231, 76, 60, 0.15)',
+        line: { color: 'transparent' },
+        type: 'scatter',
+        mode: 'lines',
+        showlegend: false,
+        hoverinfo: 'skip'
+    };
+
+    // Smooth polynomial fit lines
+    const lineAssisted = {
+        x: smoothMonths,
+        y: fitAssisted.ySmooth,
         name: 'AI-Generated or AI-Assisted',
         type: 'scatter',
         mode: 'lines',
-        line: { color: COLORS.aiAssisted, width: 3, shape: 'spline' },
-        fill: 'tozeroy',
-        fillcolor: 'rgba(142, 68, 173, 0.15)',
-        hovertemplate: '<b>%{text}</b><br>AI-Gen. or Assisted: %{y:.1f}%<extra></extra>',
-        text: data.labels
+        line: { color: COLORS.aiAssisted, width: 2.5 },
+        hoverinfo: 'skip'
     };
 
-    const trace2 = {
-        x: data.months,
-        y: data.aiGenerated,
+    const lineGenerated = {
+        x: smoothMonths,
+        y: fitGenerated.ySmooth,
         name: 'Fully AI-Generated',
         type: 'scatter',
         mode: 'lines',
-        line: { color: COLORS.aiGenerated, width: 3, shape: 'spline' },
-        fill: 'tozeroy',
-        fillcolor: 'rgba(231, 76, 60, 0.15)',
-        hovertemplate: '<b>%{text}</b><br>Fully AI-Generated: %{y:.1f}%<extra></extra>',
-        text: data.labels
+        line: { color: COLORS.aiGenerated, width: 2.5 },
+        hoverinfo: 'skip'
     };
 
-    // ChatGPT launch annotation
     const layout = {
         font: { family: FONT_FAMILY, color: '#353535' },
         margin: { t: 30, r: 30, b: 60, l: 65 },
@@ -323,7 +539,9 @@ function plotPrevalence() {
         hovermode: 'x unified'
     };
 
-    Plotly.newPlot('prevalence-plot', [trace1, trace2], layout, PLOTLY_CONFIG);
+    Plotly.newPlot('prevalence-plot',
+        [bandAssisted, bandGenerated, scatterAssisted, scatterGenerated, lineAssisted, lineGenerated],
+        layout, PLOTLY_CONFIG);
 }
 
 function plotHypothesisScatter(hypKey) {
@@ -376,16 +594,18 @@ function plotHypothesisScatter(hypKey) {
 
     const layout = {
         font: { family: FONT_FAMILY, color: '#353535' },
-        margin: { t: 15, r: 20, b: 55, l: 75 },
+        margin: { t: 15, r: 15, b: 50, l: 60 },
         xaxis: {
-            title: { text: hyp.xLabel, font: { size: 13 } },
+            title: { text: 'AI Likelihood', font: { size: 11 } },
             gridcolor: '#f0f0f0',
-            zeroline: false
+            zeroline: false,
+            tickfont: { size: 10 }
         },
         yaxis: {
-            title: { text: hyp.yLabel, font: { size: 13 } },
+            title: { text: hyp.yLabel, font: { size: 11 } },
             gridcolor: '#f0f0f0',
-            zeroline: false
+            zeroline: false,
+            tickfont: { size: 10 }
         },
         plot_bgcolor: 'white',
         paper_bgcolor: 'white',
@@ -394,7 +614,7 @@ function plotHypothesisScatter(hypKey) {
             y: regY[1],
             text: `ρ = ${hyp.rho}, p = ${hyp.p < 0.001 ? hyp.p.toExponential(1) : hyp.p}`,
             showarrow: false,
-            font: { size: 12, color: hyp.confirmed ? COLORS.confirmed : '#666', family: MONO_FONT },
+            font: { size: 11, color: hyp.confirmed ? COLORS.confirmed : '#666', family: MONO_FONT },
             xanchor: 'right',
             yanchor: 'bottom',
             yshift: 10
@@ -402,6 +622,89 @@ function plotHypothesisScatter(hypKey) {
     };
 
     Plotly.newPlot(`scatter-${hypKey}`, [scatterTrace, regTrace], layout, PLOTLY_CONFIG);
+}
+
+// Dual-axis time series plot
+function plotHypothesisTimeSeries(hypKey) {
+    const hyp = SURVEY_DATA[hypKey];
+    const ts = generateTimeSeriesData(hyp.rho, hyp.scatterSeed, hyp.yMean, hyp.yStd);
+
+    const signalColor = hyp.confirmed ? COLORS.confirmed : COLORS.scatter;
+    const aiColor = COLORS.aiAssisted;
+
+    const traceSignal = {
+        x: ts.months,
+        y: ts.signal,
+        name: hyp.yLabel,
+        type: 'scatter',
+        mode: 'lines+markers',
+        line: { color: signalColor, width: 2.5, shape: 'spline' },
+        marker: { color: signalColor, size: 4 },
+        yaxis: 'y',
+        hovertemplate: `%{x|%b %Y}<br>${hyp.yLabel}: %{y:.4f}<extra></extra>`
+    };
+
+    const traceAI = {
+        x: ts.months,
+        y: ts.aiLikelihood,
+        name: 'AI Likelihood',
+        type: 'scatter',
+        mode: 'lines+markers',
+        line: { color: aiColor, width: 2.5, shape: 'spline', dash: 'dash' },
+        marker: { color: aiColor, size: 4 },
+        yaxis: 'y2',
+        hovertemplate: '%{x|%b %Y}<br>AI Likelihood: %{y:.3f}<extra></extra>'
+    };
+
+    const layout = {
+        font: { family: FONT_FAMILY, color: '#353535' },
+        margin: { t: 15, r: 60, b: 50, l: 60 },
+        xaxis: {
+            type: 'date',
+            tickformat: '%b %Y',
+            dtick: 'M6',
+            gridcolor: '#f0f0f0',
+            zeroline: false,
+            tickfont: { size: 10 }
+        },
+        yaxis: {
+            title: { text: hyp.yLabel, font: { size: 11, color: signalColor } },
+            gridcolor: '#f0f0f0',
+            zeroline: false,
+            tickfont: { size: 10, color: signalColor },
+            side: 'left'
+        },
+        yaxis2: {
+            title: { text: 'AI Likelihood', font: { size: 11, color: aiColor } },
+            overlaying: 'y',
+            side: 'right',
+            gridcolor: 'transparent',
+            zeroline: false,
+            tickfont: { size: 10, color: aiColor }
+        },
+        plot_bgcolor: 'white',
+        paper_bgcolor: 'white',
+        legend: {
+            x: 0.02,
+            y: 0.98,
+            bgcolor: 'rgba(255,255,255,0.85)',
+            bordercolor: '#e0e0e0',
+            borderwidth: 1,
+            font: { size: 10 }
+        },
+        shapes: [{
+            type: 'line',
+            x0: '2022-11-30',
+            x1: '2022-11-30',
+            y0: 0,
+            y1: 1,
+            yref: 'paper',
+            line: { color: '#999', width: 1, dash: 'dot' }
+        }],
+        hovermode: 'x unified'
+    };
+
+    Plotly.newPlot(`timeseries-${hypKey}`, [traceSignal, traceAI], layout, PLOTLY_CONFIG);
 }
 
 function plotSurveyOverall(hypKey) {
@@ -669,6 +972,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const hypotheses = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
     hypotheses.forEach(h => {
         plotHypothesisScatter(h);
+        plotHypothesisTimeSeries(h);
         plotSurveyOverall(h);
         plotSurveyByUsage(h);
         plotSurveyByView(h);

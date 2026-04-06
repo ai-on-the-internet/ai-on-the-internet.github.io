@@ -36,7 +36,7 @@
                         <a href="#">Jonas Dolezal</a> <sup>1</sup>,
                         <a href="#">Sawood Alam</a> <sup>2</sup>,
                         <a href="#">Mark Graham</a> <sup>2</sup>,
-                        <a href="https://www.matyasbohacek.com">Matyas Bohacek</a> <sup>3</sup>*
+                        <a href="https://www.matyasbohacek.com">Maty Bohacek</a> <sup>3</sup>*
                     </p>
                     <p class="author" style="padding-top: 0px;">
                         <sup>1</sup> Imperial College London &nbsp;&nbsp;
@@ -63,10 +63,10 @@
         <fieldset class="insights-box">
             <legend>Key Findings</legend>
             <ul style="margin-left: 1.5em; margin-bottom: 0;">
-                <li style="margin-bottom: 0.8em;"><b>~35% of new websites are AI-generated or AI-assisted by mid-2025,</b> up from effectively zero before ChatGPT's launch in November 2022.</li>
-                <li style="margin-bottom: 0.8em;"><b>Two of six hypothesized negative impacts are confirmed:</b> semantic contraction (reduced diversity of ideas) and positivity shift (artificially cheerful tone).</li>
-                <li style="margin-bottom: 0.8em;"><b>Public perception diverges from evidence:</b> the majority of US adults believe in all six negative impacts, including those not supported by the data (truth decay, stylistic monoculture).</li>
-                <li style="margin-bottom: 0.0em;"><b>Beliefs correlate with AI usage and favorability:</b> infrequent AI users and AI skeptics are significantly more likely to believe in these negative impacts.</li>
+                <li style="margin-bottom: 0.8em;">~35% of new websites are AI-generated or AI-assisted by mid-2025, up from effectively zero before ChatGPT's launch in November 2022.</li>
+                <li style="margin-bottom: 0.8em;">We find evidence that the rise of AI-generated text on the internet brings about a semantic contraction (reduced diversity of topics) and a positivity shift (increased positive sentiment).</li>
+                <li style="margin-bottom: 0.8em;">The majority of US adults believe in all six tested negative impacts of AI-generated text on the internet, while we only confirm two.</li>
+                <li style="margin-bottom: 0.0em;">Beliefs correlate with AI usage and favorability: infrequent AI users and AI skeptics are significantly more likely to believe in negative impacts of AI-generated text on the internet.</li>
             </ul>
         </fieldset>
     </div>
@@ -80,18 +80,6 @@
         <div class="plot-container" id="prevalence-plot" style="width:100%; height:420px;"></div>
         <p class="caption">
             <b>AI-Generated Text on the Internet from Mid-2022 to Mid-2025.</b> The proportion of websites classified as fully AI-generated (red) and AI-generated or AI-assisted (purple) based on Pangram v3 detection applied to representative samples obtained from the Internet Archive. The dashed line marks ChatGPT's public launch in November 2022.
-        </p>
-    </div>
-
-    <!-- Summary: Evidence vs. Belief -->
-    <div class="container blog main">
-        <h1>Evidence vs. Public Belief</h1>
-    </div>
-
-    <div class="container blog large gray">
-        <div class="plot-container" id="summary-plot" style="width:100%; height:340px;"></div>
-        <p class="caption">
-            <b>Statistical Evidence vs. Public Belief for Six Hypotheses.</b> Left: Pearson correlation coefficient (&#961;) between the hypothesis signal and AI prevalence. Green bars indicate statistically significant correlations (p &lt; 0.05). Right: percentage of US adult survey respondents who lean towards agreement with each hypothesis. The public believes in all six negative impacts, but only two are supported by the data.
         </p>
     </div>
 
@@ -114,9 +102,16 @@
     </div>
 
     <div class="container blog large gray">
-        <div class="plot-container" id="scatter-h1" style="width:100%; height:340px;"></div>
+        <div class="hypothesis-plots-row">
+            <div class="hypothesis-plot-scatter">
+                <div class="plot-container plot-bordered" id="scatter-h1" style="width:100%;"></div>
+            </div>
+            <div class="hypothesis-plot-timeseries">
+                <div class="plot-container plot-bordered" id="timeseries-h1" style="width:100%; height:340px;"></div>
+            </div>
+        </div>
         <p class="caption">
-            <b>(a) Quantitative Analysis.</b> Average pairwise cosine similarity of semantic embeddings plotted against AI Likelihood score. A statistically significant positive correlation (&#961; = 0.47, p = 0.004) confirms that increased AI content correlates with reduced semantic diversity. Across all months, AI-generated websites had 33% higher semantic similarity than non-AI websites (0.0701 vs. 0.0526).
+            <b>(a) Quantitative Analysis.</b> <i>Left:</i> Average pairwise cosine similarity of semantic embeddings plotted against AI Likelihood score (&#961; = 0.47, p = 0.004). <i>Right:</i> Both signals over time, showing parallel trends that confirm the hypothesis. AI-generated websites had 33% higher semantic similarity than non-AI websites (0.0701 vs. 0.0526).
         </p>
     </div>
 
@@ -147,9 +142,16 @@
     </div>
 
     <div class="container blog large gray">
-        <div class="plot-container" id="scatter-h2" style="width:100%; height:340px;"></div>
+        <div class="hypothesis-plots-row">
+            <div class="hypothesis-plot-scatter">
+                <div class="plot-container plot-bordered" id="scatter-h2" style="width:100%;"></div>
+            </div>
+            <div class="hypothesis-plot-timeseries">
+                <div class="plot-container plot-bordered" id="timeseries-h2" style="width:100%; height:340px;"></div>
+            </div>
+        </div>
         <p class="caption">
-            <b>(a) Quantitative Analysis.</b> Factual error rate plotted against AI Likelihood score. No statistically significant correlation (&#961; = &minus;0.19, p = 0.27) was found, despite 75.1% of survey respondents believing in this hypothesis.
+            <b>(a) Quantitative Analysis.</b> <i>Left:</i> Factual error rate plotted against AI Likelihood score (&#961; = &minus;0.19, p = 0.27). <i>Right:</i> Both signals over time. No statistically significant correlation was found, despite 75.1% of survey respondents believing in this hypothesis.
         </p>
     </div>
 
@@ -180,9 +182,16 @@
     </div>
 
     <div class="container blog large gray">
-        <div class="plot-container" id="scatter-h3" style="width:100%; height:340px;"></div>
+        <div class="hypothesis-plots-row">
+            <div class="hypothesis-plot-scatter">
+                <div class="plot-container plot-bordered" id="scatter-h3" style="width:100%;"></div>
+            </div>
+            <div class="hypothesis-plot-timeseries">
+                <div class="plot-container plot-bordered" id="timeseries-h3" style="width:100%; height:340px;"></div>
+            </div>
+        </div>
         <p class="caption">
-            <b>(a) Quantitative Analysis.</b> Rate of positive documents (classified by sentiment analysis) plotted against AI Likelihood score. A statistically significant positive correlation (&#961; = 0.56, p = 0.0003) confirms the hypothesis. AI-generated websites had 107% higher positive sentiment scores than non-AI websites (0.7042 vs. 0.3400).
+            <b>(a) Quantitative Analysis.</b> <i>Left:</i> Rate of positive documents plotted against AI Likelihood score (&#961; = 0.56, p = 0.0003). <i>Right:</i> Both signals over time, showing parallel trends that confirm the hypothesis. AI-generated websites had 107% higher positive sentiment scores than non-AI websites (0.7042 vs. 0.3400).
         </p>
     </div>
 
@@ -213,9 +222,16 @@
     </div>
 
     <div class="container blog large gray">
-        <div class="plot-container" id="scatter-h4" style="width:100%; height:340px;"></div>
+        <div class="hypothesis-plots-row">
+            <div class="hypothesis-plot-scatter">
+                <div class="plot-container plot-bordered" id="scatter-h4" style="width:100%;"></div>
+            </div>
+            <div class="hypothesis-plot-timeseries">
+                <div class="plot-container plot-bordered" id="timeseries-h4" style="width:100%; height:340px;"></div>
+            </div>
+        </div>
         <p class="caption">
-            <b>(a) Quantitative Analysis.</b> Outbound link density (links per 1,000 words) plotted against AI Likelihood score. No statistically significant inverse correlation (&#961; = &minus;0.12, p = 0.48) was found.
+            <b>(a) Quantitative Analysis.</b> <i>Left:</i> Outbound link density plotted against AI Likelihood score (&#961; = &minus;0.12, p = 0.48). <i>Right:</i> Both signals over time. No statistically significant inverse correlation was found.
         </p>
     </div>
 
@@ -246,9 +262,16 @@
     </div>
 
     <div class="container blog large gray">
-        <div class="plot-container" id="scatter-h5" style="width:100%; height:340px;"></div>
+        <div class="hypothesis-plots-row">
+            <div class="hypothesis-plot-scatter">
+                <div class="plot-container plot-bordered" id="scatter-h5" style="width:100%;"></div>
+            </div>
+            <div class="hypothesis-plot-timeseries">
+                <div class="plot-container plot-bordered" id="timeseries-h5" style="width:100%; height:340px;"></div>
+            </div>
+        </div>
         <p class="caption">
-            <b>(a) Quantitative Analysis.</b> Gzip compression ratio plotted against AI Likelihood score. No statistically significant correlation (&#961; = &minus;0.02, p = 0.89) was found.
+            <b>(a) Quantitative Analysis.</b> <i>Left:</i> Gzip compression ratio plotted against AI Likelihood score (&#961; = &minus;0.02, p = 0.89). <i>Right:</i> Both signals over time. No statistically significant correlation was found.
         </p>
     </div>
 
@@ -279,9 +302,16 @@
     </div>
 
     <div class="container blog large gray">
-        <div class="plot-container" id="scatter-h6" style="width:100%; height:340px;"></div>
+        <div class="hypothesis-plots-row">
+            <div class="hypothesis-plot-scatter">
+                <div class="plot-container plot-bordered" id="scatter-h6" style="width:100%;"></div>
+            </div>
+            <div class="hypothesis-plot-timeseries">
+                <div class="plot-container plot-bordered" id="timeseries-h6" style="width:100%; height:340px;"></div>
+            </div>
+        </div>
         <p class="caption">
-            <b>(a) Quantitative Analysis.</b> Average pairwise character 3-gram Jaccard similarity plotted against AI Likelihood score. Despite 83.0% of respondents believing in this hypothesis (the strongest public agreement), no statistically significant correlation (&#961; = 0.24, p = 0.17) was found.
+            <b>(a) Quantitative Analysis.</b> <i>Left:</i> Average pairwise character 3-gram Jaccard similarity plotted against AI Likelihood score (&#961; = 0.24, p = 0.17). <i>Right:</i> Both signals over time. Despite 83.0% of respondents believing in this hypothesis, no statistically significant correlation was found.
         </p>
     </div>
 
@@ -302,13 +332,26 @@
         </div>
     </div>
 
+    <!-- Summary: Evidence vs. Belief -->
+    <div class="container blog main">
+        <hr class="section-divider">
+        <h1>Evidence vs. Public Belief</h1>
+    </div>
+
+    <div class="container blog large gray">
+        <div class="plot-container" id="summary-plot" style="width:100%; height:340px;"></div>
+        <p class="caption">
+            <b>Statistical Evidence vs. Public Belief for Six Hypotheses.</b> Left: Pearson correlation coefficient (&#961;) between the hypothesis signal and AI prevalence. Green bars indicate statistically significant correlations (p &lt; 0.05). Right: percentage of US adult survey respondents who lean towards agreement with each hypothesis. The public believes in all six negative impacts, but only two are supported by the data.
+        </p>
+    </div>
+
     <!-- Citation -->
     <div class="container blog main" style="padding-top: 3vh;">
         <hr class="section-divider">
         <h1>Citation</h1>
 <pre><code class="plaintext">@article{dolezal2025impact,
   title={The Impact of AI-Generated Text on the Internet},
-  author={Dolezal, Jonas and Alam, Sawood and Graham, Mark and Bohacek, Matyas},
+  author={Dolezal, Jonas and Alam, Sawood and Graham, Mark and Bohacek, Maty},
   year={2025}
 }</code></pre>
     </div>

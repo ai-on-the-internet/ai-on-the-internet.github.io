@@ -616,6 +616,10 @@ pre code {
   color: #666667;
   font-family: "Source Serif 4", "Charter", Georgia, serif;
 }
+.insights-box li {
+  font-size: 85% !important;
+  line-height: 1.5;
+}
 
 /* ======================== Grid ===================== */
 .columns-2 {
@@ -642,6 +646,51 @@ pre code {
 .plot-container {
   width: 100%;
   margin: 1vh 0;
+}
+
+.plot-bordered {
+  border: 1.5px solid #222;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.hypothesis-plots-row {
+  display: flex;
+  gap: 1.5vw;
+  align-items: stretch;
+  margin: 1vh 0;
+  height: 340px;
+}
+
+.hypothesis-plot-scatter {
+  flex: 0 0 340px;
+  height: 340px;
+}
+
+.hypothesis-plot-timeseries {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 340px;
+}
+
+.hypothesis-plot-scatter .plot-container,
+.hypothesis-plot-timeseries .plot-container {
+  margin: 0;
+  height: 100% !important;
+}
+
+@media screen and (max-width: 992px) {
+  .hypothesis-plots-row {
+    flex-direction: column;
+  }
+  .hypothesis-plot-scatter {
+    flex: none;
+    aspect-ratio: 1 / 1;
+    max-width: 340px;
+  }
+  .hypothesis-plot-timeseries {
+    flex: none;
+  }
 }
 
 .plot-container .js-plotly-plot {
