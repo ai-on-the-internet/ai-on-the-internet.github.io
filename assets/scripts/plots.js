@@ -74,6 +74,37 @@ function generateScatterData(rho, seed, yMean, yStd, yLabel) {
     return points;
 }
 
+// Generate time-series data for dual-axis plot
+function generateTimeSeriesData(rho, seed, yMean, yStd) {
+    const rand = mulberry32(seed + 1000);
+    const n = 36;
+    const months = [];
+    const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+    const aiLikelihood = [];
+    const signal = [];
+
+    for (let i = 0; i < n; i++) {
+        const monthIdx = (8 + i - 1) % 12;
+        const year = 2022 + Math.floor((7 + i) / 12);
+        const m = monthIdx + 1;
+        months.push(`${year}-${String(m).padStart(2, '0')}-15`);
+
+        // AI likelihood follows logistic growth
+        const aiBase = 0.35 / (1 + Math.exp(-0.22 * (i - 18)));
+        const ai = aiBase + (rand() - 0.5) * 0.02;
+        aiLikelihood.push(Math.round(ai * 1000) / 1000);
+
+        // Signal is correlated with AI likelihood via rho
+        const aiNorm = (ai - 0.15) / 0.10;
+        const yNorm = rho * aiNorm + Math.sqrt(1 - rho * rho) * gaussianRand(rand);
+        const y = yMean + yStd * yNorm;
+        signal.push(Math.round(y * 10000) / 10000);
+    }
+
+    return { months, aiLikelihood, signal };
+}
+
 function gaussianRand(rand) {
     let u = 0, v = 0;
     while (u === 0) u = rand();
@@ -376,16 +407,18 @@ function plotHypothesisScatter(hypKey) {
 
     const layout = {
         font: { family: FONT_FAMILY, color: '#353535' },
-        margin: { t: 15, r: 20, b: 55, l: 75 },
+        margin: { t: 15, r: 15, b: 50, l: 60 },
         xaxis: {
-            title: { text: hyp.xLabel, font: { size: 13 } },
+            title: { text: 'AI Likelihood', font: { size: 11 } },
             gridcolor: '#f0f0f0',
-            zeroline: false
+            zeroline: false,
+            tickfont: { size: 10 }
         },
         yaxis: {
-            title: { text: hyp.yLabel, font: { size: 13 } },
+            title: { text: hyp.yLabel, font: { size: 11 } },
             gridcolor: '#f0f0f0',
-            zeroline: false
+            zeroline: false,
+            tickfont: { size: 10 }
         },
         plot_bgcolor: 'white',
         paper_bgcolor: 'white',
@@ -394,7 +427,7 @@ function plotHypothesisScatter(hypKey) {
             y: regY[1],
             text: `ρ = ${hyp.rho}, p = ${hyp.p < 0.001 ? hyp.p.toExponential(1) : hyp.p}`,
             showarrow: false,
-            font: { size: 12, color: hyp.confirmed ? COLORS.confirmed : '#666', family: MONO_FONT },
+            font: { size: 11, color: hyp.confirmed ? COLORS.confirmed : '#666', family: MONO_FONT },
             xanchor: 'right',
             yanchor: 'bottom',
             yshift: 10
@@ -402,6 +435,89 @@ function plotHypothesisScatter(hypKey) {
     };
 
     Plotly.newPlot(`scatter-${hypKey}`, [scatterTrace, regTrace], layout, PLOTLY_CONFIG);
+}
+
+// Dual-axis time series plot
+function plotHypothesisTimeSeries(hypKey) {
+    const hyp = SURVEY_DATA[hypKey];
+    const ts = generateTimeSeriesData(hyp.rho, hyp.scatterSeed, hyp.yMean, hyp.yStd);
+
+    const signalColor = hyp.confirmed ? COLORS.confirmed : COLORS.scatter;
+    const aiColor = COLORS.aiAssisted;
+
+    const traceSignal = {
+        x: ts.months,
+        y: ts.signal,
+        name: hyp.yLabel,
+        type: 'scatter',
+        mode: 'lines+markers',
+        line: { color: signalColor, width: 2.5, shape: 'spline' },
+        marker: { color: signalColor, size: 4 },
+        yaxis: 'y',
+        hovertemplate: `%{x|%b %Y}<br>${hyp.yLabel}: %{y:.4f}<extra></extra>`
+    };
+
+    const traceAI = {
+        x: ts.months,
+        y: ts.aiLikelihood,
+        name: 'AI Likelihood',
+        type: 'scatter',
+        mode: 'lines+markers',
+        line: { color: aiColor, width: 2.5, shape: 'spline', dash: 'dash' },
+        marker: { color: aiColor, size: 4 },
+        yaxis: 'y2',
+        hovertemplate: '%{x|%b %Y}<br>AI Likelihood: %{y:.3f}<extra></extra>'
+    };
+
+    const layout = {
+        font: { family: FONT_FAMILY, color: '#353535' },
+        margin: { t: 15, r: 60, b: 50, l: 60 },
+        xaxis: {
+            type: 'date',
+            tickformat: '%b %Y',
+            dtick: 'M6',
+            gridcolor: '#f0f0f0',
+            zeroline: false,
+            tickfont: { size: 10 }
+        },
+        yaxis: {
+            title: { text: hyp.yLabel, font: { size: 11, color: signalColor } },
+            gridcolor: '#f0f0f0',
+            zeroline: false,
+            tickfont: { size: 10, color: signalColor },
+            side: 'left'
+        },
+        yaxis2: {
+            title: { text: 'AI Likelihood', font: { size: 11, color: aiColor } },
+            overlaying: 'y',
+            side: 'right',
+            gridcolor: 'transparent',
+            zeroline: false,
+            tickfont: { size: 10, color: aiColor }
+        },
+        plot_bgcolor: 'white',
+        paper_bgcolor: 'white',
+        legend: {
+            x: 0.02,
+            y: 0.98,
+            bgcolor: 'rgba(255,255,255,0.85)',
+            bordercolor: '#e0e0e0',
+            borderwidth: 1,
+            font: { size: 10 }
+        },
+        shapes: [{
+            type: 'line',
+            x0: '2022-11-30',
+            x1: '2022-11-30',
+            y0: 0,
+            y1: 1,
+            yref: 'paper',
+            line: { color: '#999', width: 1, dash: 'dot' }
+        }],
+        hovermode: 'x unified'
+    };
+
+    Plotly.newPlot(`timeseries-${hypKey}`, [traceSignal, traceAI], layout, PLOTLY_CONFIG);
 }
 
 function plotSurveyOverall(hypKey) {
@@ -669,6 +785,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const hypotheses = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
     hypotheses.forEach(h => {
         plotHypothesisScatter(h);
+        plotHypothesisTimeSeries(h);
         plotSurveyOverall(h);
         plotSurveyByUsage(h);
         plotSurveyByView(h);
