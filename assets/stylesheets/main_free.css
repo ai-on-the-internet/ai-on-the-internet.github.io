@@ -400,6 +400,9 @@ div.container.blog p.text {
   padding: 1.5vh 0;
   font-family: "Source Serif 4", "Charter", Georgia, serif;
 }
+div.container.blog p.text a {
+  font-size: inherit;
+}
 div.container.blog p.text:last-child {
   padding-bottom: 0;
 }
