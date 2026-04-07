@@ -44,7 +44,7 @@
                         <sup>3</sup> Stanford University
                     </p>
                     <p class="abstract" style="text-align: justify;">
-                        The proliferation of AI-generated and AI-assisted text on the internet is feared to contribute to a degradation in semantic and stylistic diversity, factual accuracy, and other negative developments. We find that by mid-2025, roughly <b>35% of newly published websites</b> are as AI-generated or AI-assisted, up from zero before ChatGPT's launch in late 2022. We also find evidence suggesting that increases in AI-generated text on the internet bring about a decrease of semantic diversity and an increase of positive sentiment. We do not, however, find statistically significant evidence supporting the hypothesis that an increased rate of AI-generated text on the internet decreases factual accuracy or stylistic diversity. Notably, our findings diverge from public perception of AI's impact on the internet.
+                        The proliferation of AI-generated and AI-assisted text on the internet is feared to contribute to a degradation in semantic and stylistic diversity, factual accuracy, and other negative developments. We find that by mid-2025, roughly <b>35% of newly published websites</b> were classified as AI-generated or AI-assisted, up from zero before ChatGPT's launch in late 2022. We also find evidence suggesting that increases in AI-generated text on the internet bring about a decrease in semantic diversity and an increase in positive sentiment. We do not, however, find statistically significant evidence supporting the hypothesis that an increased rate of AI-generated text on the internet decreases factual accuracy or stylistic diversity. Notably, our findings diverge from public perception of AI's impact on the internet.
                     </p>
 
                     <div class="info">
@@ -61,7 +61,7 @@
     <!-- Introduction -->
     <div class="container blog main first" id="blog-main">
         <p class="text" style="text-align: justify;">
-            AI has been moving at an unprecedented speed, changing the way people write, communicate, and work. Existing research has pointed to AI's tendency to <a href="https://arxiv.org/abs/2309.01219">hallucinate</a>, <a href="https://arxiv.org/abs/2310.13548">exhibit sycophancy</a>, and other <a href="https://arxiv.org/abs/2406.10162">undesirable behaviors</a> on the level of individual generations. However, no research has so far studied the impact of this technology on the online discourse as a whole.
+            AI has been moving at an unprecedented speed, changing the way people write, communicate, and work. Existing research has pointed to AI's tendency to <a href="https://arxiv.org/abs/2309.01219">hallucinate</a>, <a href="https://arxiv.org/abs/2310.13548">exhibit sycophancy</a>, and other <a href="https://arxiv.org/abs/2406.10162">undesirable behaviors</a> on the level of individual generations. However, no research has so far studied the impact of this technology on online discourse as a whole.
         </p>
 
         <p class="text" style="text-align: justify;">
@@ -73,7 +73,10 @@
     <div class="container blog main">
         <h1>How much new text on the internet is AI-generated?</h1>
         <p class="text" style="font-size: 90%; color: #666;">
-            TBD
+            Answering this question is harder than it might seem. Gathering a statistically representative sample of the internet is notoriously difficult: the web has no central index, popular domains are vastly over-represented in most crawls, and archival coverage has shifted considerably over time. To work around this, we draw on the Internet Archive's Wayback Machine and apply a multi-dimensional stratified sampling approach (across time of first archival, MIME type, URL depth, and top-level domain), yielding samples that approximate a uniform random draw from publicly accessible web pages published between 2022 and 2025.
+        </p>
+        <p class="text" style="font-size: 90%; color: #666;">
+            On top of this sample, we need a reliable way to tell AI-generated text apart from human-written text. Detecting AI-generated text is itself an open problem, so rather than committing to a single tool, we experiment with four prominent detectors selected based on their performance on the <a href="https://arxiv.org/abs/2405.07940">RAID benchmark</a>: Binoculars, Desklib, DivEye, and the Pangram v3 commercial API. We then run our own robustness checks across text length, HTML versus plain text, model family, model version, and language, and choose the detector that comes out the strongest overall &mdash; Pangram v3 (see Appendix A in the paper for the full analysis).
         </p>
     </div>
 
@@ -391,7 +394,7 @@
         <hr class="section-divider">
         <h1>Acknowledgements</h1>
         <p class="text" style="font-size: 90%; color: #666;">
-            The authors thank the Internet Archive for providing the Wayback Machine data and their extraordinary support throughout this project and Pangram for providing a research grant supporting the use of their API. We also thank Liam Duggan, Hany Farid, Daphne Ippolito, Shayne Longpre, and Alexander Wang for helpful discussions (listed in alphabetical order).
+            The authors thank the Internet Archive for providing the Wayback Machine data and their extraordinary support throughout this project, and Pangram for providing a research grant supporting the use of their API. We also thank Liam Duggan, Hany Farid, Daphne Ippolito, Shayne Longpre, and Alexander Wang for helpful discussions (listed in alphabetical order).
         </p>
     </div>
 
