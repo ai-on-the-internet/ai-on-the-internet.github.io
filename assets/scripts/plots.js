@@ -620,7 +620,7 @@ function plotSurveyLegends() {
     const categories = ['SD', 'D', 'SoD', 'N', 'SoA', 'A', 'SA'];
     const fullNames = ['Strongly Disagree', 'Disagree', 'Somewhat Disagree', 'Neutral', 'Somewhat Agree', 'Agree', 'Strongly Agree'];
     const html = categories.map((cat, i) =>
-        `<span style="display:inline-flex;align-items:center;margin-right:1em;margin-bottom:0.3em;font-size:12px;font-family:${FONT_FAMILY};color:#555;">` +
+        `<span style="display:inline-flex;align-items:center;margin-right:1em;margin-bottom:0.3em;font-size:12px;color:#555;">` +
         `<span style="display:inline-block;width:12px;height:12px;border-radius:2px;background:${COLORS.likert[cat]};margin-right:4px;"></span>` +
         `${fullNames[i]}</span>`
     ).join('');
