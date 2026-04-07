@@ -399,6 +399,7 @@ div.container.blog#first-content div.blog-title.no-cover .info {
 div.container.blog p.text {
   padding: 1.5vh 0;
   font-family: "Source Serif 4", "Charter", Georgia, serif;
+  text-align: justify;
 }
 div.container.blog p.text a {
   font-size: inherit;
