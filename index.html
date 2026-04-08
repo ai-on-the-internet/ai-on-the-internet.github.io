@@ -65,7 +65,7 @@
         </p>
 
         <p class="text" style="font-size: 90%; color: #666;">
-            To address this, we collected a representative sample of websites published between 2022 and 2025 through the Internet Archive's Wayback Machine to study these phenomena and answer the following questions: (1)&nbsp;How much new text on the internet is AI-generated? (2)&nbsp;What is the public's perception of AI's impact on the internet? and (3)&nbsp;How does AI-generated text actually impact online discourse?
+            To address this, we collected a representative sample of websites published between 2022 and 2025 through the Internet Archive's <a href="https://web.archive.org">Wayback Machine</a> to study these phenomena and answer the following questions: (1)&nbsp;How much new text on the internet is AI-generated? (2)&nbsp;What is the public's perception of AI's impact on the internet? and (3)&nbsp;How does AI-generated text actually impact online discourse?
         </p>
     </div>
 
@@ -76,7 +76,7 @@
             Answering this question is harder than it might seem. Constructing a statistically representative sample of the internet is difficult, as there is no central index, popular domains are vastly over-represented in most crawls, and archival coverage has shifted considerably over time. To work around this, we draw on the Internet Archive's Wayback Machine and apply a multi-dimensional stratified sampling approach, approximating a uniform random draw from publicly accessible web pages published between 2022 and 2025 (see Section 3.1 in our paper).
         </p>
         <p class="text" style="font-size: 90%; color: #666;">
-            On top of this sample, we need a reliable way to tell AI-generated and AI-assisted text apart from human-written text. AI-generated text detection is itself an open problem, so rather than committing to a single detector, we experiment with four prominent methods selected based on their performance on the <a href="https://arxiv.org/abs/2405.07940">RAID benchmark</a>: Binoculars, Desklib, DivEye, and Pangram v3. We then run our own robustness checks across text length, HTML versus plain text, model family, model version, and language, and choose the detector that comes out the strongest overall &mdash; Pangram v3 (see Appendix A in our paper).
+            On top of this sample, we need a reliable way to tell AI-generated and AI-assisted text apart from human-written text. AI-generated text detection is itself an open problem, so rather than committing to a single detector, we experiment with four prominent methods selected based on their performance on the <a href="https://arxiv.org/abs/2405.07940">RAID benchmark</a>: <a href="https://arxiv.org/abs/2401.12070">Binoculars</a>, <a href="https://huggingface.co/desklib/ai-text-detector-v1.01">Desklib</a>, <a href="https://arxiv.org/abs/2509.18880">DivEye</a>, and <a href="https://pangram.com">Pangram v3</a>. We then run our own robustness checks across text length, HTML versus plain text, model family, model version, and language, and choose the detector that comes out the strongest overall &mdash; <a href="https://pangram.com">Pangram v3</a> (see Appendix A in our paper).
         </p>
     </div>
 
