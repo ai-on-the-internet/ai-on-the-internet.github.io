@@ -1,5 +1,29 @@
 @import url("https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=HelveticaNeue:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+@font-face {
+  font-family: "Charter";
+  font-style: normal;
+  font-weight: normal;
+  src: url("../fonts/Charter/charter_regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Charter";
+  font-style: italic;
+  font-weight: normal;
+  src: url("../fonts/Charter/charter_italic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Charter";
+  font-style: normal;
+  font-weight: bold;
+  src: url("../fonts/Charter/charter_bold.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Charter";
+  font-style: italic;
+  font-weight: bold;
+  src: url("../fonts/Charter/charter_bold_italic.woff2") format("woff2");
+}
 
 a, abbr, acronym, address, applet, article, aside, audio, b, big, blockquote, body, canvas, caption, center, cite, code, dd, del, details, dfn, div, dl, dt, em, fieldset, figcaption, figure, footer, form, h1, h2, h3, h4, h5, h6, header, hgroup, html, i, iframe, img, ins, kbd, label, legend, li, mark, menu, nav, object, ol, p, pre, q, s, samp, section, small, span, strike, strong, sub, summary, sup, table, tbody, td, tfoot, th, thead, time, tr, tt, u, ul, var, video {
   margin: 0;
@@ -26,7 +50,7 @@ h1, h2, h3, h4, h5, h6, p, a, code, pre, ol, ul, li {
   line-height: 1.6;
   font-weight: 300;
   font-size: 18px;
-  font-family: "Source Serif 4", "Charter", Georgia, serif;
+  font-family: "Charter", serif;
 }
 
 a {
@@ -105,10 +129,6 @@ svg {
 ::selection {
   color: white;
   background: #353535;
-}
-
-h1, h2, h3, h4, h5, h6, p, a, code, pre, ol, ul, li {
-  line-height: 1.5;
 }
 
 @media screen and (max-width: 769px) {
@@ -319,7 +339,7 @@ footer span {
 }
 footer p {
   font-style: italic;
-  font-family: "Source Serif 4", "Charter", Georgia, serif;
+  font-family: "Charter", serif;
 }
 
 @media screen and (min-width: 1200px) {
@@ -351,14 +371,14 @@ div.container.blog#first-content div.blog-title .blog-intro {
 }
 div.container.blog#first-content div.blog-title .blog-intro p.author {
   padding: 4px 0 10px;
-  font-family: "Source Serif 4", "Charter", Georgia, serif;
+  font-family: "Charter", serif;
   font-style: italic;
   font-weight: 400;
   line-height: 1.2;
   font-size: 85%;
 }
 div.container.blog#first-content div.blog-title .blog-intro p.abstract {
-  font-family: "Source Serif 4", "Charter", Georgia, serif;
+  font-family: "Charter", serif;
   font-weight: 400;
   padding: 2.5vh 0;
   font-size: 85%;
@@ -398,7 +418,7 @@ div.container.blog#first-content div.blog-title.no-cover .info {
 
 div.container.blog p.text {
   padding: 1.5vh 0;
-  font-family: "Source Serif 4", "Charter", Georgia, serif;
+  font-family: "Charter", serif;
   text-align: justify;
 }
 div.container.blog p.text a {
@@ -618,7 +638,7 @@ pre code {
   padding: 0 0.5em;
   font-weight: 600;
   color: #666667;
-  font-family: "Source Serif 4", "Charter", Georgia, serif;
+  font-family: "Charter", serif;
 }
 .insights-box li {
   font-size: 85% !important;
@@ -756,5 +776,5 @@ pre code {
 .survey-legend-inline {
   text-align: center;
   padding: 0.5vh 0 0.5vh 0;
-  font-family: "Source Serif 4", "Charter", Georgia, serif;
+  font-family: "Charter", serif;
 }
