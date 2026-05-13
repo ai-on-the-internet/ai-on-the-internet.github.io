@@ -77,40 +77,7 @@
   }
 }
 
-.featured-on {
-  text-align: center;
-}
-.featured-on .featured-label {
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  font-size: 75% !important;
-  color: #888;
-  padding-bottom: 1.8vh;
-  margin: 0;
-}
-.featured-on .featured-logos {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 3vw;
-  row-gap: 2vh;
-}
-.featured-on .featured-logos a {
-  display: inline-flex;
-  align-items: center;
-}
-.featured-on .featured-logos img {
-  height: 36px;
-  width: auto;
-  margin: 0;
-  padding: 0;
-  display: block;
-  filter: grayscale(100%);
-  opacity: 0.55;
-  transition: opacity 0.2s ease, filter 0.2s ease;
-}
-.featured-on .featured-logos a:hover img {
-  filter: grayscale(0%);
-  opacity: 1;
+.featured-on a:hover img {
+  filter: grayscale(0%) !important;
+  opacity: 1 !important;
 }
