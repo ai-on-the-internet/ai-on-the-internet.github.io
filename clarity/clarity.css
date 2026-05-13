@@ -76,8 +76,3 @@
     grid-template-columns: repeat(1, 1fr);
   }
 }
-
-.featured-on a:hover img {
-  filter: grayscale(0%) !important;
-  opacity: 1 !important;
-}
