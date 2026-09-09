@@ -778,3 +778,123 @@ pre code {
   padding: 0.5vh 0 0.5vh 0;
   font-family: "Charter", serif;
 }
+
+/* ---- "As Featured On": expandable list of all coverage ---- */
+.coverage-details {
+  margin: 2.5vh auto 0 auto;
+  max-width: 900px;
+  text-align: center;
+}
+
+.coverage-summary {
+  display: inline-block;
+  list-style: none;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-size: 65%;
+  color: #999;
+  user-select: none;
+  transition: color 0.2s ease;
+}
+
+.coverage-summary::-webkit-details-marker {
+  display: none;
+}
+
+.coverage-summary:hover {
+  color: #555;
+}
+
+.coverage-summary i {
+  font-size: 80%;
+  margin-left: 0.3em;
+}
+
+.coverage-summary-open {
+  display: none;
+}
+
+.coverage-details[open] .coverage-summary-closed {
+  display: none;
+}
+
+.coverage-details[open] .coverage-summary-open {
+  display: inline;
+}
+
+.coverage-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 3vw;
+  row-gap: 2vh;
+  text-align: left;
+  padding-top: 2.5vh;
+}
+
+.coverage-heading {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 65%;
+  color: #aaa;
+  margin: 0;
+  padding: 0 0 1vh 0;
+}
+
+div.container.blog ul.coverage-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+div.container.blog ul.coverage-list li {
+  margin: 0;
+  padding: 0.5vh 0;
+  font-family: "Charter", serif;
+  font-size: 85%;
+  line-height: 1.45;
+  color: #666;
+}
+
+div.container.blog ul.coverage-list li a {
+  color: #666;
+  font-size: inherit;
+  text-decoration: none;
+  border-bottom: none;
+  transition: color 0.2s ease;
+}
+
+div.container.blog ul.coverage-list li a:hover {
+  color: #222;
+}
+
+.coverage-outlet {
+  font-weight: 700;
+  color: #444;
+}
+
+.coverage-outlet::after {
+  content: "\00b7";
+  font-weight: 400;
+  color: #bbb;
+  margin: 0 0.4em 0 0.45em;
+}
+
+.coverage-lang {
+  display: inline-block;
+  font-family: "Fira Code", monospace;
+  font-size: 70%;
+  color: #999;
+  background-color: #f2f2f2;
+  border-radius: 4px;
+  padding: 0.05em 0.45em;
+  margin-left: 0.4em;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+@media screen and (max-width: 992px) {
+  .coverage-grid {
+    grid-template-columns: 1fr;
+  }
+}
